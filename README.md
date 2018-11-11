@@ -2,11 +2,11 @@
     ImagePointIndicateur est un outil pour indiquer les points du polygone tracé sur un image donnée en entrée
     
 ## TODO list:
-    - [x] Tracer un polygone sur l'image avec polygone coloré
-    - [x] Possibilité de tracer plusieurs polygones coloré
-    - [ ] Affichage de tous les points du polygone sur GUI
-    - [ ] Générer un json de coordonnes de points et un label du polygone sur GUI
-    - [ ] Refactory
+- [x] Tracer un polygone sur l'image avec polygone coloré
+- [x] Possibilité de tracer plusieurs polygones coloré
+- [ ] Affichage de tous les points du polygone sur GUI
+- [ ] Générer un json de coordonnes de points et un label du polygone sur GUI
+- [ ] Refactory
 
 ## Licence
 MIT License
