@@ -5,7 +5,7 @@
 - [x] Tracer un polygone sur l'image avec polygone coloré
 - [x] Possibilité de tracer plusieurs polygones coloré
 - [x] Affichage de tous les points du polygone sur GUI
-- [ ] Ajoute scrollBar quand les textes depasse le height du canavas
+- [x] Ajoute scrollBar quand les textes depasse le height du canavas (Ps: automatique avec TextWidget)
 - [ ] Générer un json de coordonnes de points et un label du polygone sur GUI (sous forme d'un boutton)
 - [ ] Possibilité de copier les coordonées sur clipboard pour pouvoir coller (sous forme boutton)
 - [ ] Refactory
@@ -13,7 +13,7 @@
 ## Licence
 MIT License
 
-Copyright (c) [2018] [ImgPointIndicator]
+Copyright (c) [2018] [casafan.yang@gmail.com]
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
