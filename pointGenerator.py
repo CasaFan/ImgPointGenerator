@@ -1,4 +1,5 @@
 from tkinter import *
+from tkinter.ttk import Combobox, Button
 from tkinter.filedialog import askopenfilename
 from PIL import Image, ImageTk
 import random
@@ -6,8 +7,10 @@ import random
 #global vars 
 x0 = y0 = x1 = y1 = x_start = y_start = -1
 polygone = []
+polygoneCollection = []
 colorCollection = ['black', 'red', 'green', 'blue', 'cyan', 'yellow', 'magenta']
 randomColor = random.choice(colorCollection)
+#fontText = tkFont.Font(family='Helvetica')
 textHeight = 30
 
 def getNoRepeatColor():
@@ -58,18 +61,31 @@ if __name__ == "__main__":
     canvas.create_image(0,0,image=img,anchor="nw")
 
     #Text area frame
-    textCanavas = Canvas(frame, bd=0, bg='blue', height=230, scrollregion=(0, 0, 0, 500)) #To Modify 
+    textCanavas = Canvas(frame, bd=0, bg='blue', height=230)
     textCanavas.grid(row=4, column=0, sticky=N+S+E+W)
 
     #text frame in canavas
-    textFrame = Frame(textCanavas, relief=SUNKEN)
+    textFrame = Frame(textCanavas, relief=SUNKEN, bg="yellow")
     textFrame.grid_rowconfigure(0, weight=1)
     textFrame.grid_columnconfigure(0, weight=1)
-    textCanavas.create_window(20, 20, anchor=NW, window=textFrame, width=(img.width()-50), height=200, state=DISABLED)
-    textContent = Text(textFrame)
+    textCanavas.create_window(20, 20, anchor=NW, window=textFrame, width=(img.width()-50), height=200)
+    
+    #text widget
+    textContent = Text(textFrame, font='Arial')
     setTextColorTags(textContent, colorCollection)
+    textContent.pack(side=LEFT, fill=Y)
 
-    #function to be called when mouse is clicked
+    #listbox widget
+    comboBox = Combobox(textFrame, width=20)
+    comboBox['values'] = ('Text', 'Json', 'Html')
+    comboBox.current(0)
+    comboBox['state'] = 'readonly'
+    comboBox.pack(side=LEFT, padx=10, pady=5, anchor=N)
+
+    #Copy Button widget
+    copyBtn = Button(textFrame, text='Copy')
+    copyBtn.pack(anchor=E)
+
     def addLine(event):
         """
         MouseClick event pour tracer les polygones
@@ -91,11 +107,13 @@ if __name__ == "__main__":
                 x0 = -1
                 y0 = -1
                 canvas.create_polygon(' '.join(str(points) for points in polygone), fill=randomColor)
-                textContent.insert('end', getFormattedCoordinates(polygone)+'\n', randomColor)
-                textContent.pack()
+                polygoneStr = getFormattedCoordinates(polygone)
+                textContent.insert('end', polygoneStr+'\n', randomColor)
+                polygoneCollection.append(polygoneStr)
                 polygone = []
                 randomColor = getNoRepeatColor()
                 print('restart!')
+                print(polygoneCollection)
             else:
                 x0 = x1
                 y0 = y1
@@ -103,8 +121,37 @@ if __name__ == "__main__":
                 polygone.append(y0)
         
         print (event.x, event.y)
+
+    def generateText(event):
+        global textContent, polygoneCollection
+        formattedText = ''
+        selection = event.widget.get()
         
+        if selection == "Json":
+            formattedText = '{\n\tvalue: "", label: "", \n\tzone: [\n\t\t'
+            for i in range(0, len(polygoneCollection)):
+                if i != (len(polygoneCollection)-1):
+                    formattedText += '{id: "", points: "' + polygoneCollection[i] + '"},\n\t\t'
+                else: 
+                    formattedText += '{id: "", points: "' + polygoneCollection[i] + '"}\n\t'
+            formattedText += ']\n}'
+        elif selection == 'Html':
+            for polygone in polygoneCollection:
+                formattedText += '<polygon id="" class="st0" points="' + polygone + '"/>\n'
+        else:
+            for polygone in polygoneCollection:
+                formattedText += polygone + '\n'
+        textContent.delete('1.0', END)
+        textContent.insert('1.0', formattedText)
+
+    """
+    def focusOnTextArea(event):
+        global textContent
+        textContent.focus()
+    """
     #bind mouseclick event
     canvas.bind("<Button 1>", addLine)
+    comboBox.bind('<<ComboboxSelected>>', generateText)
+    #textContent.bind("<Button 1>", focusOnTextArea)
 
     root.mainloop()

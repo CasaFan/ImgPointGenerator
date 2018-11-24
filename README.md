@@ -6,7 +6,7 @@
 - [x] Possibilité de tracer plusieurs polygones coloré
 - [x] Affichage de tous les points du polygone sur GUI
 - [x] Ajoute scrollBar quand les textes depasse le height du canavas (Ps: automatique avec TextWidget)
-- [ ] Générer un json de coordonnes de points et un label du polygone sur GUI (sous forme d'un boutton)
+- [x] Générer les coordonnes de points en json ou en html sous forme de combobox sur GUI
 - [ ] Ajouter la possibilité de copier les coordonées sur clipboard pour pouvoir coller (sous forme boutton)
 - [ ] Refactory
 
