@@ -91,7 +91,7 @@ if __name__ == "__main__":
     btnFrame.pack(padx=10, pady=50)
 
     #Copy Button widget
-    copyBtn = Button(btnFrame, text='Copy')
+    copyBtn = Button(btnFrame, text='Copy text')
     copyBtn.pack()
 
     #clipboard indicator
@@ -163,7 +163,7 @@ if __name__ == "__main__":
         textAreaValues = textContent.get('1.0', END)
         root.clipboard_clear()
         root.clipboard_append(textAreaValues)
-        cpMsgLabel.pack()
+        cpMsgLabel.pack(anchor=N)
         cpMsgLabel.after(2500, clearMsgLabel)
 
     #bind mouseclick event
