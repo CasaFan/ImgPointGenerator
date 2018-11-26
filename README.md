@@ -7,7 +7,7 @@
 - [x] Affichage de tous les points du polygone sur GUI
 - [x] Ajoute scrollBar quand les textes depasse le height du canavas (Ps: automatique avec TextWidget)
 - [x] Générer les coordonnes de points en json ou en html sous forme de combobox sur GUI
-- [ ] Ajouter la possibilité de copier les coordonées sur clipboard pour pouvoir coller (sous forme boutton)
+- [x] Ajouter la possibilité de copier(sous forme boutton) les coordonées sur clipboard pour pouvoir coller n'importe où
 - [ ] Refactory
 
 ## Licence

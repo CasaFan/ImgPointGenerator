@@ -75,16 +75,27 @@ if __name__ == "__main__":
     setTextColorTags(textContent, colorCollection)
     textContent.pack(side=LEFT, fill=Y)
 
+    #utility frame
+    utilityFrame = Frame(textFrame, relief=SUNKEN)
+    utilityFrame.pack(side=LEFT, fill=BOTH)
+
     #listbox widget
-    comboBox = Combobox(textFrame, width=20)
+    comboBox = Combobox(utilityFrame, width=20)
     comboBox['values'] = ('Text', 'Json', 'Html')
     comboBox.current(0)
     comboBox['state'] = 'readonly'
-    comboBox.pack(side=LEFT, padx=10, pady=5, anchor=N)
+    comboBox.pack(padx=10, pady=5, anchor=N)
+
+    #button frame: for spacing from the combobox
+    btnFrame  = Frame(utilityFrame)
+    btnFrame.pack(padx=10, pady=50)
 
     #Copy Button widget
-    copyBtn = Button(textFrame, text='Copy')
-    copyBtn.pack(anchor=E)
+    copyBtn = Button(btnFrame, text='Copy')
+    copyBtn.pack()
+
+    #clipboard indicator
+    cpMsgLabel = Label(utilityFrame, text='text copié!')
 
     def addLine(event):
         """
@@ -144,14 +155,20 @@ if __name__ == "__main__":
         textContent.delete('1.0', END)
         textContent.insert('1.0', formattedText)
 
-    """
-    def focusOnTextArea(event):
+    def clearMsgLabel():
+        cpMsgLabel.pack_forget()
+
+    def copyTextToClipBoard(event):
         global textContent
-        textContent.focus()
-    """
+        textAreaValues = textContent.get('1.0', END)
+        root.clipboard_clear()
+        root.clipboard_append(textAreaValues)
+        cpMsgLabel.pack()
+        cpMsgLabel.after(2500, clearMsgLabel)
+
     #bind mouseclick event
     canvas.bind("<Button 1>", addLine)
     comboBox.bind('<<ComboboxSelected>>', generateText)
-    #textContent.bind("<Button 1>", focusOnTextArea)
+    copyBtn.bind("<Button 1>", copyTextToClipBoard)
 
     root.mainloop()
