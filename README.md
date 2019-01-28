@@ -9,8 +9,9 @@
 - [x] Générer les coordonnes de points en json ou en html sous forme de combobox sur GUI
 - [x] Ajouter la possibilité de copier(sous forme boutton) les coordonées sur clipboard pour pouvoir coller n'importe où
 - [x] Possibilité d'annuler en cours de traçage
+- [x] Popup lors que une polygone est tracée (labelisation)
+- [ ] Amélioration popup
 - [ ] Zoom
-- [x] Popup lors que une polygone est tracé
 - [ ] Refactory
 - [ ] Documentation
 
