@@ -8,6 +8,9 @@
 - [x] Ajoute scrollBar quand les textes depasse le height du canavas (Ps: automatique avec TextWidget)
 - [x] Générer les coordonnes de points en json ou en html sous forme de combobox sur GUI
 - [x] Ajouter la possibilité de copier(sous forme boutton) les coordonées sur clipboard pour pouvoir coller n'importe où
+- [x] Possibilité d'annuler en cours de traçage
+- [ ] Zoom
+- [x] Popup lors que une polygone est tracé
 - [ ] Refactory
 - [ ] Documentation
 
