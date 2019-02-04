@@ -13,7 +13,7 @@
 - [x] Popup lors que une polygone est tracé
 - [ ] Export json/html files
 - [ ] Sauvegarde du travail fait pour qu'on puisse travailler la prochaine session [6]
-- [ ] Refactory du code existant [H] [1]
+- [x] Refactory du code existant [H] [1]
 - [ ] Undo un polygone déjà tracé sur l'image [5]
 - [ ] Draw with preview line [H] [4]
 - [ ] Automatique draw with a polygone near by [H] [3]
