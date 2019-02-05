@@ -15,6 +15,7 @@ class GUI:
     randomColor = random.choice(colorCollection)
     # fontText = tkFont.Font(family='Helvetica')
     textHeight = 30
+    line_tmp = None
 
     def __init__(self, master, image):
         self.master = master
@@ -86,6 +87,7 @@ class GUI:
 
         # bind mouse-click event
         self.canvas.bind("<Button 1>", self.add_line)
+        self.canvas.bind("<Motion>", self.preview_line)
         self.canvas.bind("<Button 3>", self.cancel_draw)
         self.comboBox.bind('<<ComboboxSelected>>', self.generate_text)
         self.copyBtn.bind("<Button 1>", self.copy_text_to_clipboard)
@@ -254,6 +256,15 @@ class GUI:
         """
         li = s.rsplit(old, occurrence)
         return new.join(li)
+
+    def preview_line(self, event):
+        if self.line_tmp:
+            self.canvas.delete(self.line_tmp)
+            self.line_tmp = None
+        if self.x0 != -1 and self.y0 != -1:
+            x_start = self.x0
+            y_start = self.y0
+            self.line_tmp = self.canvas.create_line(x_start, y_start, event.x, event.y, fill=self.randomColor)
 
     def open_file(self):
         """
