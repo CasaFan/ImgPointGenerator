@@ -9,6 +9,7 @@ class GUI:
 
     x0 = y0 = x1 = y1 = x_start = y_start = -1
     polygone = []
+    polygonesPointsCollection = []
     polygoneCollection = {}
     colorCollection = ['black', 'red', 'green', 'blue', 'cyan', 'yellow', 'magenta']
     randomColor = random.choice(colorCollection)
@@ -19,13 +20,8 @@ class GUI:
         self.master = master
         master.title("Points indicator")
 
-        self.frame = Frame(self.master, relief=SUNKEN, bg="red")
-        self.frame.grid_rowconfigure(0, weight=1)
-        self.frame.grid_columnconfigure(0, weight=1)
-        self.frame.pack(fill=BOTH, expand=1)
         # Menu
         self.menu_bar = Menu(self.master)
-
         # create a pull-down menu, and add it to the menu bar
         file_menu = Menu(self.menu_bar, tearoff=0)
         file_menu.add_command(label="Open", command=self.open_file)
@@ -35,7 +31,12 @@ class GUI:
         self.menu_bar.add_cascade(label="File", menu=file_menu)
         self.master.config(menu=self.menu_bar)
 
-        self.master.geometry(str(image.width()) + 'x' + str(image.height() + 250))
+        # main frame
+        self.frame = Frame(self.master, relief=SUNKEN, bg="red")
+        self.frame.grid_rowconfigure(0, weight=1)
+        self.frame.grid_columnconfigure(0, weight=1)
+        self.frame.pack(fill=BOTH, expand=1)
+
         self.canvas = Canvas(self.frame, bg="black", bd=0, height=image.height(), width=image.width())
         self.canvas.grid(row=1, column=0, sticky=N + S + E + W)
         self.canvas.create_image(0, 0, image=image, anchor="nw")
@@ -114,6 +115,7 @@ class GUI:
         entry = Entry(popup, textvariable=self.roomLabel)
         entry.grid(row=0, column=1, padx=10, pady=10)
         entry.focus_set()
+        entry.bind("<Return>", (lambda event: self.end_draw_cycle(popup)))
 
         button = Button(popup, text="Ok", command=lambda: self.end_draw_cycle(popup))
         button.grid(row=1, columnspan=2, padx=10, pady=10)
@@ -143,11 +145,20 @@ class GUI:
         """
         MouseClick event pour tracer les polygones
         """
-        if self.x0 == -1 and self.y0 == -1:  # start drawing
+        if self.x0 == -1 and self.y0 == -1:  # start drawing (start point: x0, y0)
             self.x0 = event.x
             self.y0 = event.y
+            #print(str(self.x0) + ', ' + str(self.y0))
             self.x_start = self.x0
             self.y_start = self.y0
+            """
+            self.x_start = self.mutate_point(self.x0)
+            if self.x_start != self.x0:
+                self.y_start = self.mutate_point(self.y0)
+            else:
+                self.y_start = self.y0
+            print("after: " + str(self.x_start) + ", " + str(self.y_start))
+            """
             self.polygone.append(self.x_start)
             self.polygone.append(self.y_start)
         else:  # in drawing
@@ -160,12 +171,27 @@ class GUI:
                 self.x0 = -1
                 self.y0 = -1
                 self.canvas.create_polygon(' '.join(str(points) for points in self.polygone), fill=self.randomColor)
+                #self.polygonesPointsCollection.append(self.polygone)
                 self.popup_entry()
             else:
                 self.x0 = self.x1
                 self.y0 = self.y1
+                """
+                print(str(self.x1) + ', ' + str(self.y1))
+                self.x0 = self.mutate_point(self.x1)
+                self.y0 = self.mutate_point(self.y1)
+                print("after: " + str(self.x0) + ", " + str(self.y0))
+                """
                 self.polygone.append(self.x0)
                 self.polygone.append(self.y0)
+
+    def mutate_point(self, point):
+        if self.polygonesPointsCollection:
+            for polygonPoints in self.polygonesPointsCollection:
+                for pt in polygonPoints:
+                    if (pt-10) <= point <= (pt+10):
+                        return pt
+        return point
 
     def cancel_draw(self, e):
         self.x0 = self.y0 = self.x_start = self.y_start = -1
@@ -231,9 +257,14 @@ class GUI:
 
     def open_file(self):
         """
-        TODO: change imageFile
-        :return:
+        TODO: [menu item] changer l'image sur la quelle qu'on travail
+        :return: void
         """
+        self.frame.destroy()
+        # new_tk = Tk()
+        file = askopenfilename(parent=self.master, initialdir="C:/", title='')
+        img = ImageTk.PhotoImage(Image.open(file))
+        self.__init__(self.master, img)
 
     def save_to(self):
         """
