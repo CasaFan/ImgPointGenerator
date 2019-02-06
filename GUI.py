@@ -3,6 +3,7 @@ from tkinter.ttk import Combobox, Button
 from tkinter.filedialog import askopenfilename
 from PIL import Image, ImageTk
 import random
+from ExportFile import ExportFile
 
 
 class GUI:
@@ -104,7 +105,7 @@ class GUI:
         self.randomColor = self.get_no_repeat_color()
         print('restart!')
         print(self.polygoneCollection)
-
+        
     def popup_entry(self):
 
         popup = Toplevel()
@@ -219,11 +220,11 @@ class GUI:
         selection = event.widget.get()
 
         if selection == "Json":
-            formatted_text = '{\n\tvalue: "", label: "", \n\tzones: [\n\t'
+            formatted_text = '{\n\t"levels": [\n\t\t{\n\t\t\t"value": "",\n\t\t\t"label": "",\n\t\t\t"zones": [\n\t\t\t'
             for key, value in self.polygoneCollection.items():
-                formatted_text += '\t{id: "' + key + '", points: "' + value + '"},\n\t'
+                formatted_text += '\t{\n\t\t\t\t\t"id": "' + key + '",\n\t\t\t\t\t"points": "' + value + '"\n\t\t\t\t},\n\t\t'
             formatted_text = self.r_replace(formatted_text, ',', '', 1)
-            formatted_text += ']\n}'
+            formatted_text += '\t]\n\t\t}\n\t]\n}'
         elif selection == 'Html':
             for key, value in self.polygoneCollection.items():
                 formatted_text += '<polygon id="' + key + '" class="st0" points="' + value + '"/>\n'
