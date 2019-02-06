@@ -9,6 +9,7 @@ from tkinter.ttk import Combobox, Button
 from tkinter.filedialog import askopenfilename
 from PIL import Image, ImageTk
 import random
+from ExportFile import ExportFile
 
 # global vars
 x0 = y0 = x1 = y1 = x_start = y_start = -1
@@ -94,7 +95,7 @@ if __name__ == "__main__":
     # adding the image
     # File = askopenfilename(parent=root, initialdir="C:/",title='')
     # NOTE: Chemin seulement pour faciliter le developpement: à changer en prod
-    img = ImageTk.PhotoImage(Image.open("C:/Users/gs63vr/Documents/Grener/app/src/assets/img/confort/N4.png"))
+    img = ImageTk.PhotoImage(Image.open("D:/Cours/M2 Miage/Gestion de projet/ImgPointIndicator/N4.png"))
     
     root.geometry(str(img.width()) + 'x' + str(img.height()+250))
     canvas = Canvas(frame, bg="black", bd=0, height=img.height(), width=img.width())
@@ -251,6 +252,8 @@ if __name__ == "__main__":
         root.clipboard_append(textAreaValues)
         cpMsgLabel.pack(anchor=N)
         cpMsgLabel.after(2500, clearMsgLabel)
+        exportF = ExportFile()
+        exportF.export(root, textAreaValues, "building-data.json")
 
     # bind mouseclick event
     canvas.bind("<Button 1>", addLine)
