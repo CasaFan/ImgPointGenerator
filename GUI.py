@@ -1,5 +1,5 @@
 from tkinter import *
-from tkinter.ttk import Combobox, Button
+from tkinter.ttk import Button
 from tkinter.filedialog import askopenfilename
 from PIL import Image, ImageTk
 import random
@@ -21,6 +21,14 @@ class GUI:
         self.master = master
         master.title("Points indicator")
 
+        # image set
+
+        # Image
+        self.origin_image = image
+        self.scale = 1.0
+        self.img = None
+        self.img_id = None
+
         # Menu
         self.menu_bar = Menu(self.master)
         self.create_menus()
@@ -31,9 +39,10 @@ class GUI:
         self.frame.grid_columnconfigure(0, weight=1)
         self.frame.pack(fill=BOTH, expand=1)
 
-        self.canvas = Canvas(self.frame, bg="#f5f5f0", bd=0, height=image.height(), width=image.width())
+        self.canvas = Canvas(self.frame, bg="#f5f5f0", bd=0, height=image.height, width=image.width)
         self.canvas.grid(row=1, column=0, sticky=N + S + E + W)
-        self.canvas.create_image(0, 0, image=image, anchor="nw")
+        # draw the initial image at 1x scale
+        self.load_image()
 
         # Text area frame
         self.textCanvas = Canvas(self.frame, bd=0, bg='#f5f5f0', height=230)
@@ -43,9 +52,9 @@ class GUI:
         self.textFrame = Frame(self.textCanvas, relief=SUNKEN, bg="#f5f5f0")
         self.textFrame.grid_rowconfigure(0, weight=1)
         self.textFrame.grid_columnconfigure(0, weight=1)
-        self.textCanvas.create_window(20, 20, anchor=NW, window=self.textFrame, width=(image.width() - 50), height=200)
+        self.textCanvas.create_window(20, 20, anchor=NW, window=self.textFrame, width=(image.width - 50), height=200)
 
-        # text widget
+        # text area widget
         self.textContent = Text(self.textFrame, font='Arial')
         self.set_text_color_tags()
         self.textContent.grid(row=0, column=0, padx=10, sticky=NSEW)
@@ -144,7 +153,7 @@ class GUI:
         if self.x0 == -1 and self.y0 == -1:  # start drawing (start point: x0, y0)
             self.x0 = event.x
             self.y0 = event.y
-            #print(str(self.x0) + ', ' + str(self.y0))
+            print(str(self.canvas.canvasx(self.x0)) + ', ' + str(self.canvas.canvasy(self.y0)))
             self.x_start = self.x0
             self.y_start = self.y0
             """
@@ -155,8 +164,8 @@ class GUI:
                 self.y_start = self.y0
             print("after: " + str(self.x_start) + ", " + str(self.y_start))
             """
-            self.polygone.append(self.x_start)
-            self.polygone.append(self.y_start)
+            self.polygone.append(self.canvas.canvasx(self.x_start))
+            self.polygone.append(self.canvas.canvasy(self.y_start))
         else:  # in drawing
             self.x1 = event.x
             self.y1 = event.y
@@ -167,19 +176,20 @@ class GUI:
                 self.x0 = -1
                 self.y0 = -1
                 self.canvas.create_polygon(' '.join(str(points) for points in self.polygone), fill=self.randomColor)
-                #self.polygonesPointsCollection.append(self.polygone)
+                # self.polygonesPointsCollection.append(self.polygone)
                 self.popup_entry()
             else:
                 self.x0 = self.x1
                 self.y0 = self.y1
+                print(str(self.canvas.canvasx(self.x1)) + ', ' + str(self.canvas.canvasy(self.y1)))
                 """
                 print(str(self.x1) + ', ' + str(self.y1))
                 self.x0 = self.mutate_point(self.x1)
                 self.y0 = self.mutate_point(self.y1)
                 print("after: " + str(self.x0) + ", " + str(self.y0))
                 """
-                self.polygone.append(self.x0)
-                self.polygone.append(self.y0)
+                self.polygone.append(self.canvas.canvasx(self.x0, 0.5))
+                self.polygone.append(self.canvas.canvasy(self.y0, 0.5))
 
     def mutate_point(self, point):
         if self.polygonesPointsCollection:
@@ -255,19 +265,36 @@ class GUI:
             y_start = self.y0
             self.line_tmp = self.canvas.create_line(x_start, y_start, event.x, event.y, fill=self.randomColor)
 
+    def zoom(self, event):
+        if event.num == 4 or event.delta == 120:
+            self.scale *= 2
+        elif event.num == 5 or event.delta == -120:
+            self.scale *= 0.5
+        self.load_image(event.x, event.y)
+
+    def load_image(self, x=0, y=0):
+        if self.img_id:
+            self.canvas.delete(self.img_id)
+        image_width, image_height = self.origin_image.size
+        print(str(image_width) + ", " + str(image_height))
+        size = int(image_width * self.scale), int(image_height * self.scale)
+        self.img = ImageTk.PhotoImage(self.origin_image.resize(size))
+        self.img_id = self.canvas.create_image(0, 0, image=self.img, anchor=NW)
+
+        # tell the canvas to scale up/down the vector objects as well
+        self.canvas.scale(ALL, x, y, self.scale, self.scale)
+
     def open_file(self):
         """
-        TODO: [menu item] changer l'image sur la quelle qu'on travail
-        :return: void
+        [menu][item] changer l'image sur la quelle qu'on travail
         """
-        self.frame.destroy()
-        # new_tk = Tk()
+        self.load_image()
         file = askopenfilename(parent=self.master, initialdir="C:/", title='')
-        img = ImageTk.PhotoImage(Image.open(file))
-        self.__init__(self.master, img)
+        self.origin_image = Image.open(file)
+        self.load_image()
 
     def save_to(self):
         """
-        TODO: export du fichier json
+        [menu][item] TODO: export du fichier json
 
         """

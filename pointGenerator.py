@@ -61,14 +61,16 @@ def rreplace(s, old, new, occurrence):
 
 
 def openFile():
+    """
     file = askopenfilename(parent=self.master, initialdir="C:/", title='')
     image = ImageTk.PhotoImage(Image.open(file))
     self.__init__(self.master, image)
-
+    """
 
 def saveTo():
+    """
     return True
-
+    """
 
 if __name__ == "__main__":
 
