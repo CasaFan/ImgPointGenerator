@@ -15,7 +15,7 @@
 - [ ] Sauvegarde du travail fait pour qu'on puisse travailler la prochaine session [6]
 - [x] Refactory du code existant [H] [1]
 - [ ] Undo un polygone déjà tracé sur l'image [5]
-- [ ] Draw with preview line [H] [4]
+- [x] Draw with preview line
 - [ ] Automatique draw with a polygone near by [H] [3]
 - [ ] Menu [H] [2]
 - [ ] Popup si libelle existe [7]

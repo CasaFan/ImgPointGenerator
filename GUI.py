@@ -23,14 +23,7 @@ class GUI:
 
         # Menu
         self.menu_bar = Menu(self.master)
-        # create a pull-down menu, and add it to the menu bar
-        file_menu = Menu(self.menu_bar, tearoff=0)
-        file_menu.add_command(label="Open", command=self.open_file)
-        file_menu.add_command(label="Save", command=self.save_to)
-        file_menu.add_separator()
-        file_menu.add_command(label="Exit", command=self.master.quit)
-        self.menu_bar.add_cascade(label="File", menu=file_menu)
-        self.master.config(menu=self.menu_bar)
+        self.create_menus()
 
         # main frame
         self.frame = Frame(self.master, relief=SUNKEN, bg="red")
@@ -38,16 +31,16 @@ class GUI:
         self.frame.grid_columnconfigure(0, weight=1)
         self.frame.pack(fill=BOTH, expand=1)
 
-        self.canvas = Canvas(self.frame, bg="black", bd=0, height=image.height(), width=image.width())
+        self.canvas = Canvas(self.frame, bg="#f5f5f0", bd=0, height=image.height(), width=image.width())
         self.canvas.grid(row=1, column=0, sticky=N + S + E + W)
         self.canvas.create_image(0, 0, image=image, anchor="nw")
 
         # Text area frame
-        self.textCanvas = Canvas(self.frame, bd=0, bg='blue', height=230)
-        self.textCanvas.grid(row=4, column=0, sticky=N + S + E + W)
+        self.textCanvas = Canvas(self.frame, bd=0, bg='#f5f5f0', height=230)
+        self.textCanvas.grid(row=4, column=0, sticky=NSEW)
 
         # text frame in canvas
-        self.textFrame = Frame(self.textCanvas, relief=SUNKEN, bg="yellow")
+        self.textFrame = Frame(self.textCanvas, relief=SUNKEN, bg="#f5f5f0")
         self.textFrame.grid_rowconfigure(0, weight=1)
         self.textFrame.grid_columnconfigure(0, weight=1)
         self.textCanvas.create_window(20, 20, anchor=NW, window=self.textFrame, width=(image.width() - 50), height=200)
@@ -55,29 +48,7 @@ class GUI:
         # text widget
         self.textContent = Text(self.textFrame, font='Arial')
         self.set_text_color_tags()
-        self.textContent.pack(side=LEFT, fill=Y)
-
-        # utility frame
-        self.utilityFrame = Frame(self.textFrame, relief=SUNKEN)
-        self.utilityFrame.pack(side=LEFT, fill=BOTH)
-
-        # listbox widget
-        self.comboBox = Combobox(self.utilityFrame, width=20)
-        self.comboBox['values'] = ('Text', 'Json', 'Html')
-        self.comboBox.current(0)
-        self.comboBox['state'] = 'readonly'
-        self.comboBox.pack(padx=10, pady=5, anchor=N)
-
-        # button frame: for spacing from the combobox
-        self.btnFrame = Frame(self.utilityFrame)
-        self.btnFrame.pack(padx=10, pady=50)
-
-        # Copy Button widget
-        self.copyBtn = Button(self.btnFrame, text='Copy text')
-        self.copyBtn.pack()
-
-        # clipboard indicator
-        self.cpMsgLabel = Label(self.utilityFrame, text='text copié!')
+        self.textContent.grid(row=0, column=0, padx=10, sticky=NSEW)
 
         # popup entry value
         self.roomLabel = StringVar()
@@ -89,8 +60,31 @@ class GUI:
         self.canvas.bind("<Button 1>", self.add_line)
         self.canvas.bind("<Motion>", self.preview_line)
         self.canvas.bind("<Button 3>", self.cancel_draw)
-        self.comboBox.bind('<<ComboboxSelected>>', self.generate_text)
-        self.copyBtn.bind("<Button 1>", self.copy_text_to_clipboard)
+
+    def create_menus(self):
+        """
+        create pull-down menus, and add it to the menu bar
+        """
+        file_menu = Menu(self.menu_bar, tearoff=0)
+        file_menu.add_command(label="Open", command=self.open_file)
+        file_menu.add_command(label="Save", command=self.save_to)
+        file_menu.add_separator()
+        file_menu.add_command(label="Exit", command=self.master.quit)
+        self.menu_bar.add_cascade(label="File", menu=file_menu)
+        self.master.config(menu=self.menu_bar)
+
+        convert_menu = Menu(self.menu_bar, tearoff=0)
+        convert_menu.add_command(label="json", command=lambda: self.generate_text("Json"))
+        convert_menu.add_command(label="html", command=lambda: self.generate_text("Html"))
+        convert_menu.add_command(label="text", command=lambda: self.generate_text("Text"))
+        self.menu_bar.add_cascade(label="Format", menu=convert_menu)
+        self.master.config(menu=self.menu_bar)
+
+        tools_menu = Menu(self.menu_bar, tearoff=0)
+        tools_menu.add_command(label="Copy text to clipboard", command=self.copy_text_to_clipboard)
+        tools_menu.add_separator()
+        self.menu_bar.add_cascade(label="Tools", menu=tools_menu)
+        self.master.config(menu=self.menu_bar)
 
     def end_draw_cycle(self, popup):
 
@@ -198,7 +192,7 @@ class GUI:
     def cancel_draw(self, e):
         self.x0 = self.y0 = self.x_start = self.y_start = -1
         self.polygone = []
-        self.popup("Tracage annulé.")
+        self.popup("Traçage annulé.")
         for canvasLigne in self.canvasLigneCollection:
             self.canvas.delete(canvasLigne)
         self.canvasLigneCollection = []
@@ -214,17 +208,16 @@ class GUI:
         button = Button(popup, text="Ok", command=popup.destroy)
         button.grid(row=1, padx=65, pady=10)
 
-    def generate_text(self, event):
+    def generate_text(self, text_format):
         formatted_text = ''
-        selection = event.widget.get()
 
-        if selection == "Json":
+        if text_format == "Json":
             formatted_text = '{\n\tvalue: "", label: "", \n\tzones: [\n\t'
             for key, value in self.polygoneCollection.items():
                 formatted_text += '\t{id: "' + key + '", points: "' + value + '"},\n\t'
             formatted_text = self.r_replace(formatted_text, ',', '', 1)
             formatted_text += ']\n}'
-        elif selection == 'Html':
+        elif text_format == 'Html':
             for key, value in self.polygoneCollection.items():
                 formatted_text += '<polygon id="' + key + '" class="st0" points="' + value + '"/>\n'
         else:
@@ -233,15 +226,11 @@ class GUI:
         self.textContent.delete('1.0', END)
         self.textContent.insert('1.0', formatted_text)
 
-    def copy_text_to_clipboard(self, e):
+    def copy_text_to_clipboard(self):
         text_area_values = self.textContent.get('1.0', END)
         self.master.clipboard_clear()
         self.master.clipboard_append(text_area_values)
-        self.cpMsgLabel.pack(anchor=N)
-        self.cpMsgLabel.after(2500, self.clear_msg_label)
-
-    def clear_msg_label(self):
-        self.cpMsgLabel.pack_forget()
+        self.popup("Text a été copié, [Ctrl]+[V] pour coller.")
 
     def set_text_color_tags(self):
         """
