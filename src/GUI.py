@@ -21,8 +21,6 @@ class GUI:
         self.master = master
         master.title("Points indicator")
 
-        # image set
-
         # Image
         self.origin_image = image
         self.scale = 1.0

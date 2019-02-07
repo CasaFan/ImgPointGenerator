@@ -1,7 +1,6 @@
 from tkinter import Tk
-from tkinter.filedialog import askopenfilename
 from PIL import Image
-from GUI import GUI
+from src.GUI import GUI
 
 root = Tk()
 
