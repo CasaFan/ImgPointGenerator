@@ -6,7 +6,7 @@
 - [x] Générer les coordonnes de points en json ou en html sous forme de combobox sur GUI
 - [x] Ajouter la possibilité de copier(sous forme boutton) les coordonées sur clipboard pour pouvoir coller n'importe où
 - [x] Possibilité d'annuler en cours de traçage
-- [ ] Zoom (ok, but wrong coordinate when zoomed) [1]
+- [x] Zoom
 - [x] Popup lors que une polygone est tracé
 - [ ] Export json/html files
 - [ ] Sauvegarde du travail fait pour qu'on puisse travailler la prochaine session [6]
@@ -19,3 +19,4 @@
 - [ ] Corriger les bugs in issue [L]
 - [ ] Refactory (projet entier)
 - [ ] Documentation
+- [ ] Retravailler le Zoom avec scroll et finir le reload form fichier [TODO] [08/02/19]
