@@ -70,6 +70,13 @@ class GUI:
         self.canvas.bind("<Motion>", self.preview_line)
         self.canvas.bind("<Button 3>", self.cancel_draw)
 
+        # Tracer du rectangle en 1 click
+        self.x = self.y = 0 
+        self.rect = None
+        self.canvas.bind("<ButtonPress-1>", self.on_button_press)
+        self.canvas.bind("<B1-Motion>", self.on_move_press)
+        self.canvas.bind("<ButtonRelease-1>", self.on_button_release)
+
     def create_menus(self):
         """
         create pull-down menus, and add it to the menu bar
@@ -99,6 +106,7 @@ class GUI:
 
         popup.destroy()
         polygone_str = self.get_formatted_coordinates(self.polygone)
+        print(self.polygone)
         self.textContent.insert('end', self.roomLabel.get() + ': ' + polygone_str+'\n', self.randomColor)
         self.polygoneCollection[self.roomLabel.get()] = polygone_str
         self.roomLabel.set('')
@@ -222,9 +230,9 @@ class GUI:
         formatted_text = ''
 
         if text_format == "Json":
-            formatted_text = '{\n\t"levels": [\n\t\t{\n\t\t\t"value": "",\n\t\t\t"label": "",\n\t\t\t"zones": [\n\t\t\t'
+            formatted_text = '{\n\t"levels": [\n\t\t{\n\t\t\t"value": "",\n\t\t\t"label": "",\n\t\t\t"zones": [\n\t\t'
             for key, value in self.polygoneCollection.items():
-                formatted_text += '\t{\n\t\t\t\t\t"id": "' + key + '",\n\t\t\t\t\t"points": "' + value + '"\n\t\t\t\t},\n\t\t'
+                formatted_text += '\t\t{\n\t\t\t\t\t"id": "' + key + '",\n\t\t\t\t\t"points": "' + value + '"\n\t\t\t\t},\n\t\t'
             formatted_text = self.r_replace(formatted_text, ',', '', 1)
             formatted_text += '\t]\n\t\t}\n\t]\n}'
         elif text_format == 'Html':
@@ -292,6 +300,39 @@ class GUI:
         file = askopenfilename(parent=self.master, initialdir="C:/", title='')
         self.origin_image = Image.open(file)
         self.load_image()
+
+    def on_button_press(self, event):
+        self.x = event.x
+        self.y = event.y
+        if not self.rect:
+            self.rect = self.canvas.create_rectangle(self.x, self.y, self.x, self.y, outline='black')
+
+    def on_move_press(self, event):
+            
+        curX = self.canvas.canvasx(event.x)
+        curY = self.canvas.canvasy(event.y)
+        # expand rectangle as you drag the mouse
+        self.canvas.coords(self.rect, self.x, self.y, curX, curY)    
+
+    def on_button_release(self, event):
+        #coin haut gauche
+        x0,y0 = (self.x, self.y)
+        #coin bas droite
+        x2,y2 = (event.x, event.y)
+        #coin haut droite
+        x1,y1 = (x2, y0)
+        #coin bas gauche
+        x3,y3 = (x0, y2)
+
+        tab_x = [x0,x1,x2,x3]
+        tab_y = [y0,y1,y2,y3]
+        i = 0
+        while i < 4:
+            self.polygone.append(tab_x[i])
+            self.polygone.append(tab_y[i])
+            i+=1
+        self.canvas.create_polygon(' '.join(str(points) for points in self.polygone), fill=self.randomColor)
+        self.popup_entry()    
 
     def save_to(self):
         """
