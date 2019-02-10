@@ -2,8 +2,10 @@ from tkinter import *
 from tkinter.ttk import Button
 from tkinter.filedialog import askopenfilename
 from PIL import Image, ImageTk
+from util.HTMLParser import MyHTMLParser
 from util.FileHandler import FileHandler
 import random
+import json
 
 
 class GUI:
@@ -22,7 +24,7 @@ class GUI:
 
     def __init__(self, master, image):
         self.master = master
-        master.title("Points indicator")
+        self.master.title("Points indicator")
 
         # Image
         self.origin_image = image
@@ -56,14 +58,22 @@ class GUI:
         # draw the initial image at 1x scale
         self.load_image()
 
-        # zoom utility frame
-        zoom_frame = Frame(self.frame, relief=SUNKEN, bg="black", width=5)
-        zoom_frame.grid(row=1, column=2, sticky=N, pady=20)
+        """
+        zoom utility frame
+        #zoom_frame = Frame(self.frame, relief=SUNKEN)
+        #zoom_frame.grid(row=1, column=2, sticky=N, pady=20)
+        #zoom_frame.place(relx=0.92, rely=0.05)
+        """
         # zoom utility buttons
-        zoom_in_button = Button(zoom_frame, text="+", command=lambda: self.zoom("in"), width=3)
-        zoom_out_button = Button(zoom_frame, text="-", command=lambda: self.zoom("out"), width=3)
-        zoom_in_button.grid(row=0, column=0, padx=2, pady=5)
-        zoom_out_button.grid(row=1, column=0, padx=2, pady=5)
+        zoom_in_button = Button(self.frame, text="+", command=lambda: self.zoom("in"), width=3)
+        zoom_out_button = Button(self.frame, text="-", command=lambda: self.zoom("out"), width=3)
+
+        """
+        zoom_in_button.grid(row=0, column=0)
+        zoom_out_button.grid(row=1, column=0, pady=5)
+        """
+        zoom_in_button.place(relx=0.92, rely=0.03)
+        zoom_out_button.place(relx=0.92, rely=0.08)
 
         # Text area canvas
         self.textCanvas = Canvas(self.frame, bd=0, bg='#f5f5f0', height=230)
@@ -106,9 +116,9 @@ class GUI:
         self.master.config(menu=self.menu_bar)
 
         convert_menu = Menu(self.menu_bar, tearoff=0)
-        convert_menu.add_command(label="json", command=lambda: self.generate_text("Json"))
-        convert_menu.add_command(label="html", command=lambda: self.generate_text("Html"))
-        convert_menu.add_command(label="text", command=lambda: self.generate_text("Text"))
+        convert_menu.add_command(label="Json", command=lambda: self.generate_text("json"))
+        convert_menu.add_command(label="Html", command=lambda: self.generate_text("html"))
+        convert_menu.add_command(label="Text", command=lambda: self.generate_text("txt"))
         self.menu_bar.add_cascade(label="Format", menu=convert_menu)
         self.master.config(menu=self.menu_bar)
 
@@ -118,20 +128,19 @@ class GUI:
         self.master.config(menu=self.menu_bar)
 
     def end_draw_cycle(self, popup):
-
         popup.destroy()
         polygone_str = self.get_formatted_coordinates(self.polygone)
-        self.textContent.insert('end', self.roomLabel.get() + ': ' + polygone_str+'\n', self.randomColor)
+        #self.textContent.insert('end', self.roomLabel.get() + ': ' + polygone_str+'\n', self.randomColor)
         self.polygoneCollection[self.roomLabel.get()] = polygone_str
         self.roomLabel.set('')
         self.polygone = []
         self.canvasLigneCollection = []
         self.randomColor = self.get_no_repeat_color()
+        self.generate_text(self.text_format)
         print('restart!')
         print(self.polygoneCollection)
 
     def popup_entry(self):
-
         popup = Toplevel()
         popup.wm_title("Saisir un label")
         popup.wm_geometry("%dx%d%+d%+d" % (220, 80, 450, 300))
@@ -175,7 +184,7 @@ class GUI:
         if self.x0 == -1 and self.y0 == -1:  # start drawing (start point: x0, y0)
             self.x0 = event.x
             self.y0 = event.y
-            print(str(self.canvas.canvasx(self.x0)) + ', ' + str(self.canvas.canvasy(self.y0)))
+            # print(str(self.canvas.canvasx(self.x0)) + ', ' + str(self.canvas.canvasy(self.y0)))
             self.x_start = self.x0
             self.y_start = self.y0
             """
@@ -191,9 +200,9 @@ class GUI:
         else:  # in drawing
             self.x1 = event.x
             self.y1 = event.y
-            print("x0, y0: " + str(self.x0) + ", " + str(self.y0))
-            print("canvas x0, y0: " + str(self.canvas.canvasx(self.x0)) + ", " + str(self.canvas.canvasy(self.y0)))
-            print("canvas scale x0, y0: " + str(self.canvas.canvasx(self.x0) / self.scale) + ", " + str(self.canvas.canvasy(self.y0) / self.scale))
+            # print("x0, y0: " + str(self.x0) + ", " + str(self.y0))
+            # print("canvas x0, y0: " + str(self.canvas.canvasx(self.x0)) + ", " + str(self.canvas.canvasy(self.y0)))
+            # print("canvas scale x0, y0: " + str(self.canvas.canvasx(self.x0) / self.scale) + ", " + str(self.canvas.canvasy(self.y0) / self.scale))
             canvas_ligne = self.canvas.create_line(
                 self.canvas.canvasx(self.x0),
                 self.canvas.canvasy(self.y0),
@@ -211,7 +220,7 @@ class GUI:
             else:
                 self.x0 = self.x1
                 self.y0 = self.y1
-                print(str(self.canvas.canvasx(self.x1)) + ', ' + str(self.canvas.canvasy(self.y1)))
+                # print(str(self.canvas.canvasx(self.x1)) + ', ' + str(self.canvas.canvasy(self.y1)))
                 """
                 print(str(self.x1) + ', ' + str(self.y1))
                 self.x0 = self.mutate_point(self.x1)
@@ -255,14 +264,14 @@ class GUI:
     def generate_text(self, text_format):
         formatted_text = ''
 
-        if text_format == "Json":
-            formatted_text = '{\n\tvalue: "", label: "", \n\tzones: [\n\t'
+        if text_format == "json":
+            formatted_text = '{\n\t"value": "", "label": "", \n\t"zones": [\n\t'
             for key, value in self.polygoneCollection.items():
-                formatted_text += '\t{id: "' + key + '", points: "' + value + '"},\n\t'
+                formatted_text += '\t{"id": "' + key + '", "points": "' + value + '"},\n\t'
             formatted_text = self.r_replace(formatted_text, ',', '', 1)
             formatted_text += ']\n}'
             self.text_format = "json"
-        elif text_format == 'Html':
+        elif text_format == 'html':
             for key, value in self.polygoneCollection.items():
                 formatted_text += '<polygon id="' + key + '" class="st0" points="' + value + '"/>\n'
             self.text_format = "html"
@@ -353,13 +362,35 @@ class GUI:
         content = my_file_handler.load_file()
         if my_file_handler.file_extension:
             self.reinit_variables_from_content(content, my_file_handler.file_extension)
+            self.text_format = my_file_handler.file_extension.replace('.', '')
         self.reload_text_content(content)
 
-    def reinit_variables_from_content(self, contentText, extension):
-        # TODO: initialisation des datas quand reload
-        if extension == 'json':
-            print("json")
-        elif extension == 'html':
-            print("html")
-        elif extension == 'txt':
-            print("txt")
+    def reinit_variables_from_content(self, content_text, extension):
+        # vider les variables
+        self.x0 = self.y0 = self.x1 = self.y1 = self.x_start = self.y_start = -1
+        self.polygone = []
+        self.polygoneCollection = {}
+        self.line_tmp = None
+
+        # Initialisation des datas quand reload
+        if extension == '.json':
+            json_obj = json.loads(content_text)
+            for zone in json_obj['zones']:
+                points = zone['points'].replace(',', ' ')
+                self.canvas.create_polygon(points, fill=self.randomColor)
+                self.polygoneCollection[zone['id']] = zone['points']
+        elif extension == '.html':
+            my_html_parser = MyHTMLParser()
+            my_html_parser.feed(content_text)
+            for polygone in my_html_parser.polygone_collection:
+                points = polygone[2][1].replace(',', ' ')
+                self.canvas.create_polygon(points, fill=self.randomColor)
+                self.polygoneCollection[polygone[0][1]] = polygone[2][1]
+        elif extension == '.txt':
+            structured_data = content_text.rstrip('\n')
+            structured_data = [s.split(': ') for s in structured_data.splitlines()]
+            for polygon in structured_data:
+                points = polygon[1].replace(',', ' ')
+                self.canvas.create_polygon(points, fill=self.randomColor)
+                self.polygoneCollection[polygon[0]] = polygon[1]
+        self.randomColor = self.get_no_repeat_color()
