@@ -100,6 +100,13 @@ class GUI:
         self.go_to_point_mode()  # point mode by default
         self.canvas.bind("<MouseWheel>", self.on_mouse_wheel)
 
+        # Tracer du rectangle en 1 click
+        self.x = self.y = 0
+        self.rect = None
+        self.canvas.bind("<ButtonPress-1>", self.on_button_press)
+        self.canvas.bind("<B1-Motion>", self.on_move_press)
+        self.canvas.bind("<ButtonRelease-1>", self.on_button_release)
+
     def create_menus(self):
         """
         create pull-down menus, and add it to the menu bar
@@ -367,6 +374,39 @@ class GUI:
         file = askopenfilename(parent=self.master, initialdir="C:/", title='Choose a file to open')
         self.origin_image = Image.open(file)
         self.load_image()
+
+    def on_button_press(self, event):
+        self.x = event.x
+        self.y = event.y
+        if not self.rect:
+            self.rect = self.canvas.create_rectangle(self.x, self.y, self.x, self.y, outline='black')
+
+    def on_move_press(self, event):
+
+        curX = self.canvas.canvasx(event.x)
+        curY = self.canvas.canvasy(event.y)
+        # expand rectangle as you drag the mouse
+        self.canvas.coords(self.rect, self.x, self.y, curX, curY)
+
+    def on_button_release(self, event):
+        #coin haut gauche
+        x0,y0 = (self.x, self.y)
+        #coin bas droite
+        x2,y2 = (event.x, event.y)
+        #coin haut droite
+        x1,y1 = (x2, y0)
+        #coin bas gauche
+        x3,y3 = (x0, y2)
+
+        tab_x = [x0,x1,x2,x3]
+        tab_y = [y0,y1,y2,y3]
+        i = 0
+        while i < 4:
+            self.polygone.append(tab_x[i])
+            self.polygone.append(tab_y[i])
+            i+=1
+        self.canvas.create_polygon(' '.join(str(points) for points in self.polygone), fill=self.randomColor)
+        self.popup_entry()
 
     def save_to(self):
         """
