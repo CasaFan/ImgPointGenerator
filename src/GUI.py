@@ -4,13 +4,14 @@ from tkinter.filedialog import askopenfilename
 from PIL import Image, ImageTk
 from util.HTMLParser import MyHTMLParser
 from util.FileHandler import FileHandler
+from util.EmojiParser import with_surrogates
 import random
 import json
 
 
 class GUI:
 
-    x0 = y0 = x1 = y1 = x_start = y_start = -1
+    x0 = y0 = x1 = y1 = x_start = y_start = rect_x0 = rect_y0 = rect_x2 = rect_y2 = -1
     polygone = []
     polygonesPointsCollection = []
     polygoneCollection = {}
@@ -22,6 +23,7 @@ class GUI:
     # format de text in the text-area
     text_format = "txt"
     check_mark = u"\u2713"
+    rect = None
 
     def __init__(self, master, image):
         self.master = master
@@ -48,7 +50,7 @@ class GUI:
 
         # scroll bars
         self.xscrollbar = Scrollbar(self.frame, orient=HORIZONTAL)
-        self.xscrollbar.grid(row=2, column=0, sticky=EW)
+        self.xscrollbar.grid(row=2, column=0, columnspan=2, sticky=EW)
 
         self.yscrollbar = Scrollbar(self.frame)
         self.yscrollbar.grid(row=1, column=1, sticky=NS)
@@ -100,12 +102,6 @@ class GUI:
         self.go_to_point_mode()  # point mode by default
         self.canvas.bind("<MouseWheel>", self.on_mouse_wheel)
 
-        # Tracer du rectangle en 1 click
-        self.x = self.y = 0
-        self.rect = None
-        self.canvas.bind("<ButtonPress-1>", self.on_button_press)
-        self.canvas.bind("<B1-Motion>", self.on_move_press)
-        self.canvas.bind("<ButtonRelease-1>", self.on_button_release)
 
     def create_menus(self):
         """
@@ -141,9 +137,9 @@ class GUI:
         [Drag mode]: dessiner des polygones par le tire d'une aire de polygone sur l'interface
         """
         draw_mode_menu = Menu(self.menu_bar, tearoff=0)
-        draw_mode_menu.add_command(label=self.check_mark+" Point Mode",
+        draw_mode_menu.add_command(label=self.check_mark+" Point",
                                    command=lambda: self.change_draw_mode(draw_mode_menu, 'point'))
-        draw_mode_menu.add_command(label=" Drag Mode",
+        draw_mode_menu.add_command(label=" Drag",
                                    command=lambda: self.change_draw_mode(draw_mode_menu, 'drag'))
         self.menu_bar.add_cascade(label="Mode", menu=draw_mode_menu)
         self.master.config(menu=self.menu_bar)
@@ -227,9 +223,6 @@ class GUI:
         else:  # in drawing
             self.x1 = event.x
             self.y1 = event.y
-            # print("x0, y0: " + str(self.x0) + ", " + str(self.y0))
-            # print("canvas x0, y0: " + str(self.canvas.canvasx(self.x0)) + ", " + str(self.canvas.canvasy(self.y0)))
-            # print("canvas scale x0, y0: " + str(self.canvas.canvasx(self.x0) / self.scale) + ", " + str(self.canvas.canvasy(self.y0) / self.scale))
             canvas_ligne = self.canvas.create_line(
                 self.canvas.canvasx(self.x0),
                 self.canvas.canvasy(self.y0),
@@ -241,7 +234,9 @@ class GUI:
                 # endPoint ~ start point (in a range of 5 pixels ): end 1 cycle draw
                 self.x0 = -1
                 self.y0 = -1
-                self.canvas.create_polygon(' '.join(str(points * self.scale) for points in self.polygone), fill=self.randomColor)
+                self.canvas.create_polygon(
+                    ' '.join(str(points * self.scale) for points in self.polygone),
+                    fill=self.randomColor)
                 # self.polygonesPointsCollection.append(self.polygone)
                 self.popup_entry()
             else:
@@ -376,36 +371,30 @@ class GUI:
         self.load_image()
 
     def on_button_press(self, event):
-        self.x = event.x
-        self.y = event.y
-        if not self.rect:
-            self.rect = self.canvas.create_rectangle(self.x, self.y, self.x, self.y, outline='black')
+        """
+        Set x0, y0 du rectangle
+        :param event: on click event
+        """
+        self.rect = None
+        self.rect_x0 = self.canvas.canvasx(event.x) / self.scale
+        self.rect_y0 = self.canvas.canvasy(event.y) / self.scale
 
     def on_move_press(self, event):
-
-        curX = self.canvas.canvasx(event.x)
-        curY = self.canvas.canvasy(event.y)
+        if self.rect:
+            self.canvas.delete(self.rect)
+        self.rect_x2 = self.canvas.canvasx(event.x)
+        self.rect_y2 = self.canvas.canvasy(event.y)
         # expand rectangle as you drag the mouse
-        self.canvas.coords(self.rect, self.x, self.y, curX, curY)
+        self.rect = self.canvas.create_rectangle(
+            self.rect_x0 * self.scale, self.rect_y0 * self.scale, self.rect_x2, self.rect_y2, fill=self.randomColor)
 
     def on_button_release(self, event):
-        #coin haut gauche
-        x0,y0 = (self.x, self.y)
-        #coin bas droite
-        x2,y2 = (event.x, event.y)
-        #coin haut droite
-        x1,y1 = (x2, y0)
-        #coin bas gauche
-        x3,y3 = (x0, y2)
-
-        tab_x = [x0,x1,x2,x3]
-        tab_y = [y0,y1,y2,y3]
-        i = 0
-        while i < 4:
-            self.polygone.append(tab_x[i])
-            self.polygone.append(tab_y[i])
-            i+=1
-        self.canvas.create_polygon(' '.join(str(points) for points in self.polygone), fill=self.randomColor)
+        self.polygone.extend(
+            [self.rect_x0, self.rect_y0,
+             self.rect_x2 / self.scale, self.rect_y0,
+             self.rect_x2 / self.scale, self.rect_y2 / self.scale,
+             self.rect_x0, self.rect_y2 / self.scale]
+        )
         self.popup_entry()
 
     def save_to(self):
@@ -468,6 +457,8 @@ class GUI:
         TODO: erase the last polygone
         :return:
         """
+        emoji = u"\U0001F61B"
+        self.popup("Function not implemented yet " + with_surrogates(emoji))
 
     def change_draw_mode(self, menu, mode_to_change):
         """
@@ -476,25 +467,30 @@ class GUI:
         if mode_to_change != self.draw_mode:
             if mode_to_change == 'point':
                 self.go_to_point_mode()
-                menu.entryconfig(0, label=self.check_mark + ' Point Mode')
-                menu.entryconfig(2, label=' Drag Mode')
+                menu.entryconfig(0, label=self.check_mark + ' Point')
+                menu.entryconfig(2, label=' Drag')
             elif mode_to_change == 'drag':
                 self.go_to_drag_mode()
                 menu.entryconfig(0, label=' Point')
-                menu.entryconfig(2, label=self.check_mark + ' Drag Mode')
+                menu.entryconfig(2, label=self.check_mark + ' Drag')
             self.draw_mode = mode_to_change
             # self.switch_check_mark(menu, mode_to_change)
 
     def go_to_point_mode(self):
+        self.canvas.unbind("<ButtonRelease 1>")
         self.canvas.bind("<Button 1>", self.add_line)
         self.canvas.bind("<Motion>", self.preview_line)
         self.canvas.bind("<Button 3>", self.cancel_draw)
 
     def go_to_drag_mode(self):
         """
-        TODO: integrate drag mode
-        :return:
+        [Drag Mode]
         """
+        self.rect = None
+        self.canvas.unbind("<Button 3>")
+        self.canvas.bind("<Button 1>", self.on_button_press)
+        self.canvas.bind("<B1-Motion>", self.on_move_press)
+        self.canvas.bind("<ButtonRelease 1>", self.on_button_release)
 
     """ [poubelle]
     def switch_check_mark(self, menu, mode_to_change):
