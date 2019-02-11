@@ -98,6 +98,8 @@ class GUI:
         """
         create pull-down menus, and add it to the menu bar
         """
+
+        # menu File
         file_menu = Menu(self.menu_bar, tearoff=0)
         file_menu.add_command(label="New Image", command=self.open_file)
         file_menu.add_command(label="Save Data", command=self.save_to)
@@ -107,6 +109,7 @@ class GUI:
         self.menu_bar.add_cascade(label="File", menu=file_menu)
         self.master.config(menu=self.menu_bar)
 
+        # menu Format
         convert_menu = Menu(self.menu_bar, tearoff=0)
         convert_menu.add_command(label="Json", command=lambda: self.generate_text("json"))
         convert_menu.add_command(label="Html", command=lambda: self.generate_text("html"))
@@ -114,9 +117,16 @@ class GUI:
         self.menu_bar.add_cascade(label="Format", menu=convert_menu)
         self.master.config(menu=self.menu_bar)
 
+        # menu Tools
         tools_menu = Menu(self.menu_bar, tearoff=0)
         tools_menu.add_command(label="Copy text to clipboard", command=self.copy_text_to_clipboard)
         self.menu_bar.add_cascade(label="Tools", menu=tools_menu)
+        self.master.config(menu=self.menu_bar)
+
+        # menu Undo
+        menu_undo = Menu(self.menu_bar, tearoff=0)
+        menu_undo.add_command(label="Undo the last polygone", command=self.erase_last_polygone)
+        self.menu_bar.add_cascade(label="Undo", menu=menu_undo)
         self.master.config(menu=self.menu_bar)
 
     def end_draw_cycle(self, popup):
@@ -394,3 +404,9 @@ class GUI:
             self.zoom_scale.set(round(value))
             self.scale = round(value)
             self.zoom(round(value))
+
+    def erase_last_polygone(self):
+        """
+        TODO: erase the last polygone
+        :return:
+        """
