@@ -6,7 +6,7 @@
 - [x] Générer les coordonnes de points en json ou en html sous forme de combobox sur GUI
 - [x] Ajouter la possibilité de copier(sous forme boutton) les coordonées sur clipboard pour pouvoir coller n'importe où
 - [x] Possibilité d'annuler en cours de traçage
-- [x] Zoom (float button in frame)
+- [x] Zoom (float button in frame) [TODO: redraw all the polygone when zoomed]
 - [x] Popup lors que une polygone est tracé
 - [x] Export json/html files
 - [x] Sauvegarde du travail fait pour qu'on puisse travailler la prochaine session
@@ -15,6 +15,7 @@
 - [x] Add a slide bar for zoom [TODO: amélioration visuel]
 - [ ] Automatique draw with a polygone near by [H] [3]
 - [ ] Menu [1] [Undo the last draw]
+- [ ] Menu: draw mode selection
 - [ ] Warning si libelle existe [7]
 - [ ] Corriger les bugs in issue [L]
 - [ ] Code refactoring (projet entier)

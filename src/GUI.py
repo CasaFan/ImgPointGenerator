@@ -21,10 +21,14 @@ class GUI:
     line_tmp = None
     # format de text in the text-area
     text_format = "txt"
+    check_mark = u"\u2713"
 
     def __init__(self, master, image):
         self.master = master
         self.master.title("Points indicator")
+
+        # Mode de draw
+        self.draw_mode = "point"
 
         # Image
         self.origin_image = image
@@ -50,7 +54,11 @@ class GUI:
         self.yscrollbar.grid(row=1, column=1, sticky=NS)
 
         # canvas for image
-        self.canvas = Canvas(self.frame, bg="black", bd=0, height=self.origin_image.height, width=self.origin_image.width, xscrollcommand=self.xscrollbar.set, yscrollcommand=self.yscrollbar.set)
+        self.canvas = Canvas(self.frame, bg="black", bd=0,
+                             height=self.origin_image.height,
+                             width=self.origin_image.width,
+                             xscrollcommand=self.xscrollbar.set,
+                             yscrollcommand=self.yscrollbar.set)
         self.canvas.grid(row=1, column=0, sticky=NSEW)
         self.xscrollbar.config(command=self.canvas.xview)
         self.yscrollbar.config(command=self.canvas.yview)
@@ -89,16 +97,13 @@ class GUI:
         self.canvasLigneCollection = []
 
         # bind mouse-click event
-        self.canvas.bind("<Button 1>", self.add_line)
-        self.canvas.bind("<Motion>", self.preview_line)
-        self.canvas.bind("<Button 3>", self.cancel_draw)
+        self.go_to_point_mode()  # point mode by default
         self.canvas.bind("<MouseWheel>", self.on_mouse_wheel)
 
     def create_menus(self):
         """
         create pull-down menus, and add it to the menu bar
         """
-
         # menu File
         file_menu = Menu(self.menu_bar, tearoff=0)
         file_menu.add_command(label="New Image", command=self.open_file)
@@ -121,6 +126,19 @@ class GUI:
         tools_menu = Menu(self.menu_bar, tearoff=0)
         tools_menu.add_command(label="Copy text to clipboard", command=self.copy_text_to_clipboard)
         self.menu_bar.add_cascade(label="Tools", menu=tools_menu)
+        self.master.config(menu=self.menu_bar)
+
+        """
+        menu Mode (draw mode): 
+        [Point mode]: dessiner des polygones par des points
+        [Drag mode]: dessiner des polygones par le tire d'une aire de polygone sur l'interface
+        """
+        draw_mode_menu = Menu(self.menu_bar, tearoff=0)
+        draw_mode_menu.add_command(label=self.check_mark+" Point Mode",
+                                   command=lambda: self.change_draw_mode(draw_mode_menu, 'point'))
+        draw_mode_menu.add_command(label=" Drag Mode",
+                                   command=lambda: self.change_draw_mode(draw_mode_menu, 'drag'))
+        self.menu_bar.add_cascade(label="Mode", menu=draw_mode_menu)
         self.master.config(menu=self.menu_bar)
 
         # menu Undo
@@ -232,7 +250,7 @@ class GUI:
                 self.polygone.append(self.canvas.canvasx(self.x0, 0.5) / self.scale)
                 self.polygone.append(self.canvas.canvasy(self.y0, 0.5) / self.scale)
 
-    """
+    """ [TODO]: draw with a polygone near by
     def mutate_point(self, point):
         if self.polygonesPointsCollection:
             for polygonPoints in self.polygonesPointsCollection:
@@ -410,3 +428,40 @@ class GUI:
         TODO: erase the last polygone
         :return:
         """
+
+    def change_draw_mode(self, menu, mode_to_change):
+        """
+        Fonction qui change le mode de draw entre "point mode" et "drag mode"
+        """
+        if mode_to_change != self.draw_mode:
+            if mode_to_change == 'point':
+                self.go_to_point_mode()
+                menu.entryconfig(0, label=self.check_mark + ' Point Mode')
+                menu.entryconfig(2, label=' Drag Mode')
+            elif mode_to_change == 'drag':
+                self.go_to_drag_mode()
+                menu.entryconfig(0, label=' Point')
+                menu.entryconfig(2, label=self.check_mark + ' Drag Mode')
+            self.draw_mode = mode_to_change
+            # self.switch_check_mark(menu, mode_to_change)
+
+    def go_to_point_mode(self):
+        self.canvas.bind("<Button 1>", self.add_line)
+        self.canvas.bind("<Motion>", self.preview_line)
+        self.canvas.bind("<Button 3>", self.cancel_draw)
+
+    def go_to_drag_mode(self):
+        """
+        TODO: integrate drag mode
+        :return:
+        """
+
+    """ [poubelle]
+    def switch_check_mark(self, menu, mode_to_change):
+        if mode_to_change == 'point':
+            menu.entryconfig(0, label=self.check_mark + ' Point Mode')
+            menu.entryconfig(2, label=' Drag Mode')
+        elif mode_to_change == 'drag':
+            menu.entryconfig(0, label=' Point')
+            menu.entryconfig(2, label=self.check_mark + ' Drag Mode')
+    """
