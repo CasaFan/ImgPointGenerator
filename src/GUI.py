@@ -1,5 +1,5 @@
 from tkinter import *
-from tkinter.ttk import Button
+from tkinter.ttk import Button, Scale
 from tkinter.filedialog import askopenfilename
 from PIL import Image, ImageTk
 from util.HTMLParser import MyHTMLParser
@@ -58,26 +58,18 @@ class GUI:
         # draw the initial image at 1x scale
         self.load_image()
 
-        """
-        zoom utility frame
-        #zoom_frame = Frame(self.frame, relief=SUNKEN)
-        #zoom_frame.grid(row=1, column=2, sticky=N, pady=20)
-        #zoom_frame.place(relx=0.92, rely=0.05)
-        """
         # zoom utility buttons
-        zoom_in_button = Button(self.frame, text="+", command=lambda: self.zoom("in"), width=3)
-        zoom_out_button = Button(self.frame, text="-", command=lambda: self.zoom("out"), width=3)
+        zoom_in_button = Button(self.frame, text="+", command=lambda: self.zoom(self.scale*2), width=3)
+        zoom_out_button = Button(self.frame, text="-", command=lambda: self.zoom(self.scale*0.5), width=3)
+        self.zoom_scale = Scale(self.frame, from_=1, to=3, length=80, command=self.on_scale, orient=VERTICAL)
 
-        """
-        zoom_in_button.grid(row=0, column=0)
-        zoom_out_button.grid(row=1, column=0, pady=5)
-        """
         zoom_in_button.place(relx=0.92, rely=0.03)
-        zoom_out_button.place(relx=0.92, rely=0.08)
+        zoom_out_button.place(relx=0.92, rely=0.18)
+        self.zoom_scale.place(relx=0.92, rely=0.07)
 
         # Text area canvas
         self.textCanvas = Canvas(self.frame, bd=0, bg='#f5f5f0', height=230)
-        self.textCanvas.grid(row=4, column=0, sticky=NSEW)
+        self.textCanvas.grid(row=4, column=0, columnspan=2, sticky=NSEW)
 
         # text frame in canvas
         self.textFrame = Frame(self.textCanvas, relief=SUNKEN, bg="#f5f5f0")
@@ -130,7 +122,7 @@ class GUI:
     def end_draw_cycle(self, popup):
         popup.destroy()
         polygone_str = self.get_formatted_coordinates(self.polygone)
-        #self.textContent.insert('end', self.roomLabel.get() + ': ' + polygone_str+'\n', self.randomColor)
+        # self.textContent.insert('end', self.roomLabel.get() + ': ' + polygone_str+'\n', self.randomColor)
         self.polygoneCollection[self.roomLabel.get()] = polygone_str
         self.roomLabel.set('')
         self.polygone = []
@@ -230,6 +222,7 @@ class GUI:
                 self.polygone.append(self.canvas.canvasx(self.x0, 0.5) / self.scale)
                 self.polygone.append(self.canvas.canvasy(self.y0, 0.5) / self.scale)
 
+    """
     def mutate_point(self, point):
         if self.polygonesPointsCollection:
             for polygonPoints in self.polygonesPointsCollection:
@@ -237,6 +230,7 @@ class GUI:
                     if (pt-10) <= point <= (pt+10):
                         return pt
         return point
+    """
 
     def cancel_draw(self, e):
         self.x0 = self.y0 = self.x_start = self.y_start = -1
@@ -319,12 +313,11 @@ class GUI:
                 self.canvas.canvasy(event.y),
                 fill=self.randomColor)
 
-    def zoom(self, zoom_type):
-        if zoom_type == "in":
-            self.scale *= 2
-        elif zoom_type == "out":
-            self.scale *= 0.5
-        self.load_image()
+    def zoom(self, zoom_scale):
+        if 1 <= zoom_scale <= 4:
+            self.scale = zoom_scale
+            self.zoom_scale.set(self.scale)
+            self.load_image()
 
     def load_image(self):
         if self.img_id:
@@ -394,3 +387,10 @@ class GUI:
                 self.canvas.create_polygon(points, fill=self.randomColor)
                 self.polygoneCollection[polygon[0]] = polygon[1]
         self.randomColor = self.get_no_repeat_color()
+
+    def on_scale(self, event):
+        value = self.zoom_scale.get()
+        if int(value) != value:
+            self.zoom_scale.set(round(value))
+            self.scale = round(value)
+            self.zoom(round(value))

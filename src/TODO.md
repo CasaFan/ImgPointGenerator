@@ -10,12 +10,13 @@
 - [x] Popup lors que une polygone est tracé
 - [x] Export json/html files
 - [x] Sauvegarde du travail fait pour qu'on puisse travailler la prochaine session
-- [x] Refactory du code existant
+- [x] Refactoring du code existant
 - [x] Draw with preview line
+- [x] Add a slide bar for zoom [TODO: amélioration visuel]
 - [ ] Automatique draw with a polygone near by [H] [3]
 - [ ] Menu [1] [Undo the last draw]
 - [ ] Warning si libelle existe [7]
 - [ ] Corriger les bugs in issue [L]
-- [ ] Refactory (projet entier)
+- [ ] Code refactoring (projet entier)
 - [ ] Documentation
 - [x] Retravailler le Zoom avec scroll et finir le reload form fichier
