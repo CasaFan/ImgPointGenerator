@@ -9,7 +9,6 @@ from tkinter.ttk import Combobox, Button
 from tkinter.filedialog import askopenfilename
 from PIL import Image, ImageTk
 import random
-from ExportFile import ExportFile
 
 # global vars
 x0 = y0 = x1 = y1 = x_start = y_start = -1
