@@ -24,6 +24,7 @@ class GUI:
     text_format = "txt"
     check_mark = u"\u2713"
     rect = None
+    canvasLigneCollection = []
 
     def __init__(self, master, image):
         self.master = master
@@ -95,9 +96,6 @@ class GUI:
         # popup entry value
         self.roomLabel = StringVar()
 
-        # Les traces de ligne
-        self.canvasLigneCollection = []
-
         # bind mouse-click event
         self.go_to_point_mode()  # point mode by default
         self.canvas.bind("<MouseWheel>", self.on_mouse_wheel)
@@ -146,7 +144,7 @@ class GUI:
 
         # menu Undo
         menu_undo = Menu(self.menu_bar, tearoff=0)
-        menu_undo.add_command(label="Undo the last polygone", command=self.erase_last_polygone)
+        menu_undo.add_command(label="Remove the last polygone", command=self.erase_last_polygone)
         self.menu_bar.add_cascade(label="Undo", menu=menu_undo)
         self.master.config(menu=self.menu_bar)
 
@@ -265,7 +263,7 @@ class GUI:
     def cancel_draw(self, e):
         self.x0 = self.y0 = self.x_start = self.y_start = -1
         self.polygone = []
-        self.popup("Traçage annulé.")
+        self.popup("Cancelled draw.")
         for canvasLigne in self.canvasLigneCollection:
             self.canvas.delete(canvasLigne)
         self.canvasLigneCollection = []
@@ -416,11 +414,9 @@ class GUI:
         self.reload_text_content(content)
 
     def reinit_variables_from_content(self, content_text, extension):
-        # vider les variables
-        self.x0 = self.y0 = self.x1 = self.y1 = self.x_start = self.y_start = -1
-        self.polygone = []
+        # clean global variables
+        self.clean_global_variables()
         self.polygoneCollection = {}
-        self.line_tmp = None
 
         # Initialisation des datas quand reload
         if extension == '.json':
@@ -474,9 +470,9 @@ class GUI:
                 menu.entryconfig(0, label=' Point')
                 menu.entryconfig(2, label=self.check_mark + ' Drag')
             self.draw_mode = mode_to_change
-            # self.switch_check_mark(menu, mode_to_change)
 
     def go_to_point_mode(self):
+        self.clean_global_variables()
         self.canvas.unbind("<ButtonRelease 1>")
         self.canvas.bind("<Button 1>", self.add_line)
         self.canvas.bind("<Motion>", self.preview_line)
@@ -486,7 +482,7 @@ class GUI:
         """
         [Drag Mode]
         """
-        self.rect = None
+        self.clean_global_variables()
         self.canvas.unbind("<Button 3>")
         self.canvas.bind("<Button 1>", self.on_button_press)
         self.canvas.bind("<B1-Motion>", self.on_move_press)
@@ -501,3 +497,14 @@ class GUI:
             menu.entryconfig(0, label=' Point')
             menu.entryconfig(2, label=self.check_mark + ' Drag Mode')
     """
+
+    def clean_global_variables(self):
+        """
+        Réinitialiser les variables globales sauf la collection de polygone :polygoneCollection
+        """
+        self.x0 = self.y0 = self.x1 = self.y1 = self.x_start = self.y_start = self.rect_x0 = self.rect_y0 = self.rect_x2 = self.rect_y2 = -1
+        self.polygone = []
+        self.randomColor = self.get_no_repeat_color()
+        self.line_tmp = None
+        self.rect = None
+        self.canvasLigneCollection = []
