@@ -25,6 +25,7 @@ class GUI:
     check_mark = u"\u2713"
     rect = None
     canvasLigneCollection = []
+    the_last_draw = None
 
     def __init__(self, master, image):
         self.master = master
@@ -100,7 +101,6 @@ class GUI:
         self.go_to_point_mode()  # point mode by default
         self.canvas.bind("<MouseWheel>", self.on_mouse_wheel)
 
-
     def create_menus(self):
         """
         create pull-down menus, and add it to the menu bar
@@ -149,24 +149,30 @@ class GUI:
         self.master.config(menu=self.menu_bar)
 
     def end_draw_cycle(self, popup):
-        popup.destroy()
-        polygone_str = self.get_formatted_coordinates(self.polygone)
-        # self.textContent.insert('end', self.roomLabel.get() + ': ' + polygone_str+'\n', self.randomColor)
-        self.polygoneCollection[self.roomLabel.get()] = polygone_str
-        self.roomLabel.set('')
-        self.polygone = []
-        self.canvasLigneCollection = []
-        self.randomColor = self.get_no_repeat_color()
-        self.generate_text(self.text_format)
-        print('restart!')
-        print(self.polygoneCollection)
+        if self.roomLabel.get() in self.polygoneCollection:
+            self.popup("Id already exist and they are unique.", "#ff3838")
+            self.roomLabel.set('')
+        elif self.roomLabel.get() == '':
+            self.popup("The id can't be empty.", "#ff3838")
+        else:
+            popup.destroy()
+            polygone_str = self.get_formatted_coordinates(self.polygone)
+            # self.textContent.insert('end', self.roomLabel.get() + ': ' + polygone_str+'\n', self.randomColor)
+            self.polygoneCollection[self.roomLabel.get()] = polygone_str
+            self.roomLabel.set('')
+            self.polygone = []
+            self.remove_polygone_lignes()
+            self.randomColor = self.get_no_repeat_color()
+            self.generate_text(self.text_format)
+            print('restart!')
+            print(self.polygoneCollection)
 
     def popup_entry(self):
         popup = Toplevel()
-        popup.wm_title("Saisir un label")
+        popup.wm_title("Entry an id")
         popup.wm_geometry("%dx%d%+d%+d" % (220, 80, 450, 300))
 
-        popup_label = Label(popup, text="Label : ")
+        popup_label = Label(popup, text="Id : ")
         popup_label.grid(row=0, padx=10, pady=10)
 
         entry = Entry(popup, textvariable=self.roomLabel)
@@ -176,6 +182,8 @@ class GUI:
 
         button = Button(popup, text="Ok", command=lambda: self.end_draw_cycle(popup))
         button.grid(row=1, columnspan=2, padx=10, pady=10)
+        #popup.bind("<Destroy>", self.close_entry_popup_window)
+        popup.protocol("WM_DELETE_WINDOW", lambda: self.close_entry_popup_window(popup))
 
     def get_formatted_coordinates(self, the_polygone):
         """
@@ -232,7 +240,7 @@ class GUI:
                 # endPoint ~ start point (in a range of 5 pixels ): end 1 cycle draw
                 self.x0 = -1
                 self.y0 = -1
-                self.canvas.create_polygon(
+                self.the_last_draw = self.canvas.create_polygon(
                     ' '.join(str(points * self.scale) for points in self.polygone),
                     fill=self.randomColor)
                 # self.polygonesPointsCollection.append(self.polygone)
@@ -263,18 +271,19 @@ class GUI:
     def cancel_draw(self, e):
         self.x0 = self.y0 = self.x_start = self.y_start = -1
         self.polygone = []
-        self.popup("Cancelled draw.")
-        for canvasLigne in self.canvasLigneCollection:
-            self.canvas.delete(canvasLigne)
-        self.canvasLigneCollection = []
+        self.popup("Draw cancelled.")
+        self.remove_polygone_lignes()
 
-    def popup(self, msg):
+    def popup(self, msg, text_color=None):
         popup = Toplevel(self.master)
         # popup window par rapport a l'écran TODO: center to root window
         popup.wm_title("Info")
         popup.wm_geometry("%dx%d%+d%+d" % (220, 80, 450, 300))
 
-        popup_label = Label(popup, text=msg)
+        if text_color:
+            popup_label = Label(popup, text=msg, fg=text_color)
+        else:
+            popup_label = Label(popup, text=msg)
         popup_label.grid(row=0, padx=10, pady=10)
 
         button = Button(popup, text="Ok", command=popup.destroy)
@@ -311,7 +320,7 @@ class GUI:
         text_area_values = self.textContent.get('1.0', END)
         self.master.clipboard_clear()
         self.master.clipboard_append(text_area_values)
-        self.popup("Text a été copié, [Ctrl]+[V] pour coller.")
+        self.popup("Text copied to clipboard, [Ctrl]+[V] to paste.")
 
     def set_text_color_tags(self):
         """
@@ -393,6 +402,7 @@ class GUI:
              self.rect_x2 / self.scale, self.rect_y2 / self.scale,
              self.rect_x0, self.rect_y2 / self.scale]
         )
+        self.the_last_draw = self.rect
         self.popup_entry()
 
     def save_to(self):
@@ -507,4 +517,14 @@ class GUI:
         self.randomColor = self.get_no_repeat_color()
         self.line_tmp = None
         self.rect = None
+
+    def close_entry_popup_window(self, popup, event=None):
+        popup.destroy()
+        self.canvas.delete(self.the_last_draw)
+        self.remove_polygone_lignes()
+        self.clean_global_variables()
+
+    def remove_polygone_lignes(self):
+        for canvasLigne in self.canvasLigneCollection:
+            self.canvas.delete(canvasLigne)
         self.canvasLigneCollection = []

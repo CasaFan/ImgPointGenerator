@@ -13,11 +13,11 @@
 - [x] Refactoring du code existant
 - [x] Draw with preview line
 - [x] Add a slide bar for zoom [TODO: amélioration visuel]
-- [ ] Automatique draw with a polygone near by [H] [3]
-- [ ] Menu [1] [Undo the last draw]
-- [ ] Menu: draw mode selection
-- [ ] Warning si libelle existe [7]
-- [ ] Corriger les bugs in issue [L]
+- [ ] Automatique draw with a polygone near by [L] [3]
+- [ ] Menu [1] [TODO: Undo the last draw]
+- [x] Menu: draw mode selection
+- [x] Warning si libelle existe sous forme de popup
+- [ ] Corriger les bugs in issue [M]
 - [ ] Code refactoring (projet entier)
 - [ ] Documentation
 - [x] Retravailler le Zoom avec scroll et finir le reload form fichier
