@@ -14,10 +14,11 @@
 - [x] Draw with preview line
 - [x] Add a slide bar for zoom [TODO: amélioration visuel]
 - [ ] Automatique draw with a polygone near by [L] [3]
-- [ ] Menu [1] [TODO: Undo the last draw]
+- [x] Menu
 - [x] Menu: draw mode selection
 - [x] Warning si libelle existe sous forme de popup
 - [ ] Corriger les bugs in issue [M]
 - [ ] Code refactoring (projet entier)
 - [ ] Documentation
 - [x] Retravailler le Zoom avec scroll et finir le reload form fichier
+- [ ] Fixer la taille de fenêtre à ouvrir par défaut[2]

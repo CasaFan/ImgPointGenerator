@@ -460,11 +460,11 @@ class GUI:
 
     def erase_last_polygone(self):
         """
-        TODO: erase the last polygone
-        :return:
+        clean the last drawn
         """
-        emoji = u"\U0001F61B"
-        self.popup("Function not implemented yet " + with_surrogates(emoji))
+        self.canvas.delete(self.the_last_draw)
+        self.remove_polygone_lignes()
+        self.clean_global_variables()
 
     def change_draw_mode(self, menu, mode_to_change):
         """
