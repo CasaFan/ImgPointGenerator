@@ -484,6 +484,7 @@ class GUI:
     def go_to_point_mode(self):
         self.clean_global_variables()
         self.canvas.unbind("<ButtonRelease 1>")
+        self.canvas.unbind("<B1-Motion>")
         self.canvas.bind("<Button 1>", self.add_line)
         self.canvas.bind("<Motion>", self.preview_line)
         self.canvas.bind("<Button 3>", self.cancel_draw)
