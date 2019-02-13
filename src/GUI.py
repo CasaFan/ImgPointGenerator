@@ -13,7 +13,7 @@ class GUI:
 
     x0 = y0 = x1 = y1 = x_start = y_start = rect_x0 = rect_y0 = rect_x2 = rect_y2 = -1
     polygone = []
-    polygonesPointsCollection = []
+    # polygonesPointsCollection = []
     polygoneCollection = {}
     colorCollection = ['black', 'red', 'green', 'blue', 'cyan', 'yellow', 'magenta']
     randomColor = random.choice(colorCollection)
@@ -355,10 +355,10 @@ class GUI:
             self.scale = zoom_scale
             self.zoom_scale.set(self.scale)
             self.load_image()
+            self.redraw_all_polygone()
 
     def load_image(self):
-        if self.img_id:
-            self.canvas.delete(self.img_id)
+        self.canvas.delete("all")
         image_width, image_height = self.origin_image.size
         size = int(image_width * self.scale), int(image_height * self.scale)
         self.img = ImageTk.PhotoImage(self.origin_image.resize(size))
@@ -372,7 +372,6 @@ class GUI:
         """
         [menu][File][Open] changer l'image sur la quelle qu'on travail
         """
-        self.load_image()
         file = askopenfilename(parent=self.master, initialdir="C:/", title='Choose a file to open')
         self.origin_image = Image.open(file)
         self.load_image()
@@ -471,6 +470,7 @@ class GUI:
         Fonction qui change le mode de draw entre "point mode" et "drag mode"
         """
         if mode_to_change != self.draw_mode:
+            # TODO: [clean] separer le switch de menu dans 2 fonction differents
             if mode_to_change == 'point':
                 self.go_to_point_mode()
                 menu.entryconfig(0, label=self.check_mark + ' Point')
@@ -498,16 +498,6 @@ class GUI:
         self.canvas.bind("<B1-Motion>", self.on_move_press)
         self.canvas.bind("<ButtonRelease 1>", self.on_button_release)
 
-    """ [poubelle]
-    def switch_check_mark(self, menu, mode_to_change):
-        if mode_to_change == 'point':
-            menu.entryconfig(0, label=self.check_mark + ' Point Mode')
-            menu.entryconfig(2, label=' Drag Mode')
-        elif mode_to_change == 'drag':
-            menu.entryconfig(0, label=' Point')
-            menu.entryconfig(2, label=self.check_mark + ' Drag Mode')
-    """
-
     def clean_global_variables(self):
         """
         Réinitialiser les variables globales sauf la collection de polygone :polygoneCollection
@@ -528,3 +518,10 @@ class GUI:
         for canvasLigne in self.canvasLigneCollection:
             self.canvas.delete(canvasLigne)
         self.canvasLigneCollection = []
+
+    def redraw_all_polygone(self):
+        for polygone_coordinates in self.polygoneCollection.values():
+            points = polygone_coordinates.replace(',', ' ').rstrip().split(' ')
+            points = [float(point) * self.scale for point in points]
+            canvas_coord = ' '.join(str(s) for s in points)
+            self.canvas.create_polygon(canvas_coord, fill=self.randomColor)
