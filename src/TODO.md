@@ -18,7 +18,8 @@
 - [x] Menu: draw mode selection
 - [x] Warning si libelle existe sous forme de popup
 - [ ] Add scroll bar to text widget [H]
-- [ ] Force to input image file when open file [H]
+- [x] Force to input image file when open file [H]
+- [ ] Change image canvas size according to image size [H]
 - [ ] Corriger les bugs in issue [M]
 - [ ] Code refactoring (projet entier)
 - [ ] Documentation

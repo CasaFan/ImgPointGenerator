@@ -212,7 +212,6 @@ class GUI:
         if self.x0 == -1 and self.y0 == -1:  # start drawing (start point: x0, y0)
             self.x0 = event.x
             self.y0 = event.y
-            # print(str(self.canvas.canvasx(self.x0)) + ', ' + str(self.canvas.canvasy(self.y0)))
             self.x_start = self.x0
             self.y_start = self.y0
             """
@@ -248,7 +247,6 @@ class GUI:
             else:
                 self.x0 = self.x1
                 self.y0 = self.y1
-                # print(str(self.canvas.canvasx(self.x1)) + ', ' + str(self.canvas.canvasy(self.y1)))
                 """
                 print(str(self.x1) + ', ' + str(self.y1))
                 self.x0 = self.mutate_point(self.x1)
@@ -364,7 +362,7 @@ class GUI:
         self.img = ImageTk.PhotoImage(self.origin_image.resize(size))
         self.img_id = self.canvas.create_image(0, 0, image=self.img, anchor=NW)
 
-        # tell the canvas to scale up/down the vector objects as well
+        # tell the canvas to scale up/down the vector objects
         self.canvas.scale(ALL, 0, 0, self.scale, self.scale)
         self.canvas.configure(scrollregion=self.canvas.bbox("all"))
 
@@ -372,10 +370,17 @@ class GUI:
         """
         [menu][File][Open] changer l'image sur la quelle qu'on travail
         """
-        file = askopenfilename(parent=self.master, initialdir="C:/", title='Choose a file to open')
+        file = askopenfilename(
+            parent=self.master,
+            initialdir="C:/",
+            title='Choose a file to open',
+            filetypes=FileHandler.IMAGE_FILE_TYPES)
         if file:
-            self.origin_image = Image.open(file)
-            self.load_image()
+            try:
+                self.origin_image = Image.open(file)
+                self.load_image()
+            except IOError:
+                self.popup("Can't open the image file!", "#ff3838")
 
     def on_button_press(self, event):
         """
@@ -430,7 +435,7 @@ class GUI:
         self.polygone_id_collection = {}
         self.polygoneCollection = {}
 
-        # Initialisation des datas quand reload
+        # Initialisation datas quand reload
         if extension == '.json':
             json_obj = json.loads(content_text)
             for zone in json_obj['zones']:
