@@ -8,12 +8,16 @@ from util.EmojiParser import with_surrogates
 import random
 import json
 
+WINDOW_WIDTH = 1900
+WINDOW_HEIGHT = 1080
+
 
 class GUI:
 
     x0 = y0 = x1 = y1 = x_start = y_start = rect_x0 = rect_y0 = rect_x2 = rect_y2 = -1
     polygone = []
     # polygonesPointsCollection = []
+    polygone_id_collection = {}
     polygoneCollection = {}
     colorCollection = ['black', 'red', 'green', 'blue', 'cyan', 'yellow', 'magenta']
     randomColor = random.choice(colorCollection)
@@ -27,7 +31,7 @@ class GUI:
     canvasLigneCollection = []
     the_last_draw = None
 
-    def __init__(self, master, image):
+    def __init__(self, master):
         self.master = master
         self.master.title("Points indicator")
 
@@ -35,7 +39,7 @@ class GUI:
         self.draw_mode = "point"
 
         # Image
-        self.origin_image = image
+        self.origin_image = None
         self.scale = 1.0
         self.img = None
         self.img_id = None
@@ -45,7 +49,7 @@ class GUI:
         self.create_menus()
 
         # main frame
-        self.frame = Frame(self.master, relief=SUNKEN, bg="red", width=800)
+        self.frame = Frame(self.master, relief=SUNKEN, bg="red", width=WINDOW_WIDTH)
         self.frame.grid_rowconfigure(0, weight=1)
         self.frame.grid_columnconfigure(0, weight=1)
         self.frame.pack(fill=None, expand=False)
@@ -57,18 +61,15 @@ class GUI:
         self.yscrollbar = Scrollbar(self.frame)
         self.yscrollbar.grid(row=1, column=1, sticky=NS)
 
-        # canvas for image
+        # canvas to put image
         self.canvas = Canvas(self.frame, bg="black", bd=0,
-                             height=self.origin_image.height,
-                             width=self.origin_image.width,
+                             height=(WINDOW_HEIGHT-400),
+                             width=(WINDOW_WIDTH-100),
                              xscrollcommand=self.xscrollbar.set,
                              yscrollcommand=self.yscrollbar.set)
         self.canvas.grid(row=1, column=0, sticky=NSEW)
         self.xscrollbar.config(command=self.canvas.xview)
         self.yscrollbar.config(command=self.canvas.yview)
-
-        # draw the initial image at 1x scale
-        self.load_image()
 
         # zoom utility buttons
         zoom_in_button = Button(self.frame, text="+", command=lambda: self.zoom(self.scale*2), width=3)
@@ -76,23 +77,22 @@ class GUI:
         self.zoom_scale = Scale(self.frame, from_=1, to=3, length=80, command=self.on_scale, orient=VERTICAL)
 
         zoom_in_button.place(relx=0.92, rely=0.03)
-        zoom_out_button.place(relx=0.92, rely=0.18)
         self.zoom_scale.place(relx=0.92, rely=0.07)
+        zoom_out_button.place(relx=0.92, rely=0.18)
 
-        # Text area canvas
-        self.textCanvas = Canvas(self.frame, bd=0, bg='#f5f5f0', height=230)
-        self.textCanvas.grid(row=4, column=0, columnspan=2, sticky=NSEW)
-
-        # text frame in canvas
-        self.textFrame = Frame(self.textCanvas, relief=SUNKEN, bg="#f5f5f0")
+        # Frame to put text
+        self.textFrame = Frame(self.frame, relief=SUNKEN, bg=self.master.cget('bg'),
+                               width=WINDOW_WIDTH-100,
+                               height=(WINDOW_HEIGHT-int(self.canvas['height'])-135))
         self.textFrame.grid_rowconfigure(0, weight=1)
         self.textFrame.grid_columnconfigure(0, weight=1)
-        self.textCanvas.create_window(20, 20, anchor=NW, window=self.textFrame, width=(image.width - 50), height=200)
+        self.textFrame.grid(row=3, column=0, columnspan=2, sticky=NSEW)
+        self.textFrame.grid_propagate(False)
 
         # text area widget
         self.textContent = Text(self.textFrame, font='Arial')
+        self.textContent.grid(row=4, column=0, padx=25, pady=25, sticky=NSEW)
         self.set_text_color_tags()
-        self.textContent.grid(row=0, column=0, padx=10, sticky=NSEW)
 
         # popup entry value
         self.roomLabel = StringVar()
@@ -144,7 +144,7 @@ class GUI:
 
         # menu Undo
         menu_undo = Menu(self.menu_bar, tearoff=0)
-        menu_undo.add_command(label="Remove the last polygone", command=self.erase_last_polygone)
+        menu_undo.add_command(label="Remove the last polygone", command=self.undo_last_polygone)
         self.menu_bar.add_cascade(label="Undo", menu=menu_undo)
         self.master.config(menu=self.menu_bar)
 
@@ -182,7 +182,6 @@ class GUI:
 
         button = Button(popup, text="Ok", command=lambda: self.end_draw_cycle(popup))
         button.grid(row=1, columnspan=2, padx=10, pady=10)
-        #popup.bind("<Destroy>", self.close_entry_popup_window)
         popup.protocol("WM_DELETE_WINDOW", lambda: self.close_entry_popup_window(popup))
 
     def get_formatted_coordinates(self, the_polygone):
@@ -243,6 +242,7 @@ class GUI:
                 self.the_last_draw = self.canvas.create_polygon(
                     ' '.join(str(points * self.scale) for points in self.polygone),
                     fill=self.randomColor)
+                self.polygone_id_collection[self.the_last_draw] = self.randomColor
                 # self.polygonesPointsCollection.append(self.polygone)
                 self.popup_entry()
             else:
@@ -373,8 +373,9 @@ class GUI:
         [menu][File][Open] changer l'image sur la quelle qu'on travail
         """
         file = askopenfilename(parent=self.master, initialdir="C:/", title='Choose a file to open')
-        self.origin_image = Image.open(file)
-        self.load_image()
+        if file:
+            self.origin_image = Image.open(file)
+            self.load_image()
 
     def on_button_press(self, event):
         """
@@ -402,6 +403,7 @@ class GUI:
              self.rect_x0, self.rect_y2 / self.scale]
         )
         self.the_last_draw = self.rect
+        self.polygone_id_collection[self.the_last_draw] = self.randomColor
         self.popup_entry()
 
     def save_to(self):
@@ -425,6 +427,7 @@ class GUI:
     def reinit_variables_from_content(self, content_text, extension):
         # clean global variables
         self.clean_global_variables()
+        self.polygone_id_collection = {}
         self.polygoneCollection = {}
 
         # Initialisation des datas quand reload
@@ -432,21 +435,24 @@ class GUI:
             json_obj = json.loads(content_text)
             for zone in json_obj['zones']:
                 points = zone['points'].replace(',', ' ')
-                self.canvas.create_polygon(points, fill=self.randomColor)
+                polygone = self.canvas.create_polygon(points, fill=self.randomColor)
+                self.polygone_id_collection[polygone] = ''
                 self.polygoneCollection[zone['id']] = zone['points']
         elif extension == '.html':
             my_html_parser = MyHTMLParser()
             my_html_parser.feed(content_text)
             for polygone in my_html_parser.polygone_collection:
                 points = polygone[2][1].replace(',', ' ')
-                self.canvas.create_polygon(points, fill=self.randomColor)
+                polygone = self.canvas.create_polygon(points, fill=self.randomColor)
+                self.polygone_id_collection[polygone] = ''
                 self.polygoneCollection[polygone[0][1]] = polygone[2][1]
         elif extension == '.txt':
             structured_data = content_text.rstrip('\n')
             structured_data = [s.split(': ') for s in structured_data.splitlines()]
             for polygon in structured_data:
                 points = polygon[1].replace(',', ' ')
-                self.canvas.create_polygon(points, fill=self.randomColor)
+                polygone = self.canvas.create_polygon(points, fill=self.randomColor)
+                self.polygone_id_collection[polygone] = ''
                 self.polygoneCollection[polygon[0]] = polygon[1]
         self.randomColor = self.get_no_repeat_color()
 
@@ -457,13 +463,17 @@ class GUI:
             self.scale = round(value)
             self.zoom(round(value))
 
-    def erase_last_polygone(self):
+    def undo_last_polygone(self):
         """
         clean the last drawn
         """
-        self.canvas.delete(self.the_last_draw)
-        self.remove_polygone_lignes()
-        self.clean_global_variables()
+        if self.polygone_id_collection:
+            self.canvas.delete(list(self.polygone_id_collection.items())[-1][0])
+            self.polygone_id_collection.popitem()
+            # self.canvas.delete(self.the_last_draw)
+            self.clean_global_variables()
+            self.polygoneCollection.popitem()
+            self.generate_text(self.text_format)
 
     def change_draw_mode(self, menu, mode_to_change):
         """
@@ -525,4 +535,5 @@ class GUI:
             points = polygone_coordinates.replace(',', ' ').rstrip().split(' ')
             points = [float(point) * self.scale for point in points]
             canvas_coord = ' '.join(str(s) for s in points)
-            self.canvas.create_polygon(canvas_coord, fill=self.randomColor)
+            polygone = self.canvas.create_polygon(canvas_coord, fill=self.randomColor)
+            self.polygone_id_collection[polygone] = ''
