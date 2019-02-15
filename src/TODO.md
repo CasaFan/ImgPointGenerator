@@ -20,8 +20,9 @@
 - [ ] Add scroll bar to text widget [H]
 - [x] Force to input image file when open file [H]
 - [ ] Change image canvas size according to image size [H]
+- [ ] Enable / Disable zoom [H]
 - [ ] Corriger les bugs in issue [M]
 - [ ] Code refactoring (projet entier)
 - [ ] Documentation
 - [x] Retravailler le Zoom avec scroll et finir le reload form fichier
-- [ ] Fixer la taille de fenêtre à ouvrir par défaut[2]
+- [x] Fixer la taille de fenêtre à la taille de écran lors l'ouverture

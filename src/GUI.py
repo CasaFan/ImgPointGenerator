@@ -8,9 +8,6 @@ from util.EmojiParser import with_surrogates
 import random
 import json
 
-WINDOW_WIDTH = 1900
-WINDOW_HEIGHT = 1080
-
 
 class GUI:
 
@@ -49,7 +46,7 @@ class GUI:
         self.create_menus()
 
         # main frame
-        self.frame = Frame(self.master, relief=SUNKEN, bg="red", width=WINDOW_WIDTH)
+        self.frame = Frame(self.master, relief=SUNKEN, bg="red", width=self.master.winfo_width())
         self.frame.grid_rowconfigure(0, weight=1)
         self.frame.grid_columnconfigure(0, weight=1)
         self.frame.pack(fill=None, expand=False)
@@ -63,11 +60,12 @@ class GUI:
 
         # canvas to put image
         self.canvas = Canvas(self.frame, bg="black", bd=0,
-                             height=(WINDOW_HEIGHT-400),
-                             width=(WINDOW_WIDTH-100),
+                             height=(self.master.winfo_height()-250),
+                             width=(self.master.winfo_width()-100),
                              xscrollcommand=self.xscrollbar.set,
                              yscrollcommand=self.yscrollbar.set)
         self.canvas.grid(row=1, column=0, sticky=NSEW)
+        self.canvas.config(state=DISABLED)
         self.xscrollbar.config(command=self.canvas.xview)
         self.yscrollbar.config(command=self.canvas.yview)
 
@@ -76,14 +74,14 @@ class GUI:
         zoom_out_button = Button(self.frame, text="-", command=lambda: self.zoom(self.scale*0.5), width=3)
         self.zoom_scale = Scale(self.frame, from_=1, to=3, length=80, command=self.on_scale, orient=VERTICAL)
 
-        zoom_in_button.place(relx=0.92, rely=0.03)
-        self.zoom_scale.place(relx=0.92, rely=0.07)
-        zoom_out_button.place(relx=0.92, rely=0.18)
+        zoom_in_button.place(relx=0.93, rely=0.03)
+        self.zoom_scale.place(relx=0.93, rely=0.07)
+        zoom_out_button.place(relx=0.93, rely=0.18)
 
         # Frame to put text
         self.textFrame = Frame(self.frame, relief=SUNKEN, bg=self.master.cget('bg'),
-                               width=WINDOW_WIDTH-100,
-                               height=(WINDOW_HEIGHT-int(self.canvas['height'])-135))
+                               width=(self.master.winfo_width()),
+                               height=(self.master.winfo_height()-int(self.canvas['height'])-50))
         self.textFrame.grid_rowconfigure(0, weight=1)
         self.textFrame.grid_columnconfigure(0, weight=1)
         self.textFrame.grid(row=3, column=0, columnspan=2, sticky=NSEW)
@@ -369,6 +367,10 @@ class GUI:
     def open_file(self):
         """
         [menu][File][Open] changer l'image sur la quelle qu'on travail
+        """
+        """
+        # [DEV] Chemin seulement pour faciliter le développement: à changer en prod
+        file = Image.open("C:/Users/gs63vr/Documents/Grener/app/src/assets/img/confort/N4.png")
         """
         file = askopenfilename(
             parent=self.master,
