@@ -380,6 +380,8 @@ class GUI:
         if file:
             try:
                 self.origin_image = Image.open(file)
+                self.polygoneCollection = {}
+                self.reload_text_content('')
                 self.load_image()
             except IOError:
                 self.popup("Can't open the image file!", "#ff3838")

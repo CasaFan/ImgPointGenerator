@@ -8,6 +8,7 @@
 
 ### Medium
 - [x] Add a slider for zoom [TODO: amélioration visuel]
+- [ ] Polygon transparency
 - [ ] Enhancement in issues
 - [ ] Code refactoring (projet entier)
 - [ ] Documentation
@@ -15,7 +16,7 @@
 ### Low
 - [ ] Automatique draw with a polygone near by
 
-### Finished list
+### Finished
 - [x] Tracer un polygone sur l'image avec polygone coloré
 - [x] Possibilité de tracer plusieurs polygones coloré
 - [x] Affichage de tous les points du polygone sur GUI
