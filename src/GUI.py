@@ -70,13 +70,14 @@ class GUI:
         self.yscrollbar.config(command=self.canvas.yview)
 
         # zoom utility buttons
-        zoom_in_button = Button(self.frame, text="+", command=lambda: self.zoom(self.scale*2), width=3)
-        zoom_out_button = Button(self.frame, text="-", command=lambda: self.zoom(self.scale*0.5), width=3)
+        self.zoom_in_button = Button(self.frame, text="+", command=lambda: self.zoom(self.scale*2), width=3)
+        self.zoom_out_button = Button(self.frame, text="-", command=lambda: self.zoom(self.scale*0.5), width=3)
         self.zoom_scale = Scale(self.frame, from_=1, to=3, length=80, command=self.on_scale, orient=VERTICAL)
 
-        zoom_in_button.place(relx=0.93, rely=0.03)
+        self.zoom_in_button.place(relx=0.93, rely=0.03)
         self.zoom_scale.place(relx=0.93, rely=0.07)
-        zoom_out_button.place(relx=0.93, rely=0.18)
+        self.zoom_out_button.place(relx=0.93, rely=0.18)
+        self.change_zoom_state(0)
 
         # Frame to put text
         self.textFrame = Frame(self.frame, relief=SUNKEN, bg=self.master.cget('bg'),
@@ -95,6 +96,7 @@ class GUI:
         # popup entry value
         self.roomLabel = StringVar()
 
+        self.open_file()
         # bind mouse-click event
         self.go_to_point_mode()  # point mode by default
         self.canvas.bind("<MouseWheel>", self.on_mouse_wheel)
@@ -208,6 +210,7 @@ class GUI:
         MouseClick event pour tracer les polygones
         """
         if self.x0 == -1 and self.y0 == -1:  # start drawing (start point: x0, y0)
+            self.change_zoom_state(0)
             self.x0 = event.x
             self.y0 = event.y
             self.x_start = self.x0
@@ -242,6 +245,7 @@ class GUI:
                 self.polygone_id_collection[self.the_last_draw] = self.randomColor
                 # self.polygonesPointsCollection.append(self.polygone)
                 self.popup_entry()
+                self.change_zoom_state(1)
             else:
                 self.x0 = self.x1
                 self.y0 = self.y1
@@ -269,6 +273,7 @@ class GUI:
         self.polygone = []
         self.popup("Draw cancelled.")
         self.remove_polygone_lignes()
+        self.change_zoom_state(1)
 
     def popup(self, msg, text_color=None):
         popup = Toplevel(self.master)
@@ -383,6 +388,7 @@ class GUI:
                 self.polygoneCollection = {}
                 self.reload_text_content('')
                 self.load_image()
+                self.change_zoom_state(1)
             except IOError:
                 self.popup("Can't open the image file!", "#ff3838")
 
@@ -546,3 +552,13 @@ class GUI:
             canvas_coord = ' '.join(str(s) for s in points)
             polygone = self.canvas.create_polygon(canvas_coord, fill=self.randomColor)
             self.polygone_id_collection[polygone] = ''
+
+    def change_zoom_state(self, state):
+        if state == 0:
+            self.zoom_in_button.state(['disabled'])
+            self.zoom_out_button.state(['disabled'])
+            self.zoom_scale.state(['disabled'])
+        else:
+            self.zoom_in_button.state(['!disabled'])
+            self.zoom_out_button.state(['!disabled'])
+            self.zoom_scale.state(['!disabled'])
