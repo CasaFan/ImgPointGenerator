@@ -4,7 +4,6 @@ from tkinter.filedialog import askopenfilename
 from PIL import Image, ImageTk
 from util.HTMLParser import MyHTMLParser
 from util.FileHandler import FileHandler
-from util.EmojiParser import with_surrogates
 import random
 import json
 
@@ -13,10 +12,9 @@ class GUI:
 
     x0 = y0 = x1 = y1 = x_start = y_start = rect_x0 = rect_y0 = rect_x2 = rect_y2 = -1
     polygone = []
-    # polygonesPointsCollection = []
     polygone_id_collection = {}
     polygoneCollection = {}
-    colorCollection = ['black', 'red', 'green', 'blue', 'cyan', 'yellow', 'magenta']
+    colorCollection = ['#151515', '#ffb2b2', '#66b266', '#6666ff', '#b2ffff', '#ffff99', '#ffb2ff']
     randomColor = random.choice(colorCollection)
     # fontText = tkFont.Font(family='Helvetica')
     textHeight = 30
@@ -46,7 +44,7 @@ class GUI:
         self.create_menus()
 
         # main frame
-        self.frame = Frame(self.master, relief=SUNKEN, bg="red", width=self.master.winfo_width())
+        self.frame = Frame(self.master, relief=SUNKEN, width=self.master.winfo_width())
         self.frame.grid_rowconfigure(0, weight=1)
         self.frame.grid_columnconfigure(0, weight=1)
         self.frame.pack(fill=None, expand=False)
@@ -59,7 +57,7 @@ class GUI:
         self.yscrollbar.grid(row=1, column=1, sticky=NS)
 
         # canvas to put image
-        self.canvas = Canvas(self.frame, bg="black", bd=0,
+        self.canvas = Canvas(self.frame, bg="#ededed", bd=0,
                              height=(self.master.winfo_height()-250),
                              width=(self.master.winfo_width()-100),
                              xscrollcommand=self.xscrollbar.set,
@@ -157,15 +155,12 @@ class GUI:
         else:
             popup.destroy()
             polygone_str = self.get_formatted_coordinates(self.polygone)
-            # self.textContent.insert('end', self.roomLabel.get() + ': ' + polygone_str+'\n', self.randomColor)
             self.polygoneCollection[self.roomLabel.get()] = polygone_str
             self.roomLabel.set('')
             self.polygone = []
             self.remove_polygone_lignes()
             self.randomColor = self.get_no_repeat_color()
             self.generate_text(self.text_format)
-            print('restart!')
-            print(self.polygoneCollection)
 
     def popup_entry(self):
         popup = Toplevel()
@@ -249,24 +244,8 @@ class GUI:
             else:
                 self.x0 = self.x1
                 self.y0 = self.y1
-                """
-                print(str(self.x1) + ', ' + str(self.y1))
-                self.x0 = self.mutate_point(self.x1)
-                self.y0 = self.mutate_point(self.y1)
-                print("after: " + str(self.x0) + ", " + str(self.y0))
-                """
                 self.polygone.append(self.canvas.canvasx(self.x0, 0.5) / self.scale)
                 self.polygone.append(self.canvas.canvasy(self.y0, 0.5) / self.scale)
-
-    """ [TODO]: draw with a polygone near by
-    def mutate_point(self, point):
-        if self.polygonesPointsCollection:
-            for polygonPoints in self.polygonesPointsCollection:
-                for pt in polygonPoints:
-                    if (pt-10) <= point <= (pt+10):
-                        return pt
-        return point
-    """
 
     def cancel_draw(self, e):
         self.x0 = self.y0 = self.x_start = self.y_start = -1
