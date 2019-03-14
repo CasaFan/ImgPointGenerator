@@ -3,7 +3,6 @@
 ### High
 - [ ] Change image canvas size according to image size
 - [ ] Add scroll bar to text widget
-- [ ] Enable / Disable zoom
 - [ ] Corriger les bugs in issues
 
 ### Medium
@@ -17,6 +16,7 @@
 - [ ] Automatique draw with a polygone near by
 
 ### Finished
+- [x] Enable / Disable zoom
 - [x] Tracer un polygone sur l'image avec polygone coloré
 - [x] Possibilité de tracer plusieurs polygones coloré
 - [x] Affichage de tous les points du polygone sur GUI
