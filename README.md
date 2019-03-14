@@ -1,5 +1,5 @@
 # ImgPointIndicator
-    ImagePointIndicator is a outil on which we can generate coordinates of polygons we drew on an image 
+    ImagePointIndicator is a tool on which we can generate coordinates of polygons we drew on an image 
 
 ## Features
 * Draw a polygon in 2 different mode: [Drag mode](#drag-mode) & [Point mode](#point-mode-precision-mode)
@@ -12,7 +12,7 @@
 * Zoom the image for better precision
 
 ### Drag mode
-We can draw simple rectangle or square by dragging from the first point and drop at the last point.
+We can draw simple rectangles or squares by dragging from the first point and dropping at the last point.
 
 ### Point mode (Precision mode)
 In this mode we can draw a real polygon point by point to get the best and the most precise polygon.
